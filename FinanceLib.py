@@ -221,3 +221,14 @@ def GetAdjCloseInCol(tickers_list, df):
     for ticker in tickers_list:
         data[ticker] = df['AdjClose']
     return data
+
+def GetPctChange(df):
+    df_change = df.drop(['OpenValue', 'HighValue', 'LowValue', 'CloseValue', 'Volume', 'LoadDt'], axis=1)
+    
+    df_change['Change'] = df_change.groupby('Stock').AdjClose.pct_change()
+    df_change['Change7'] = df_change.groupby('Stock').AdjClose.pct_change(7)
+    df_change['Change30'] = df_change.groupby('Stock').AdjClose.pct_change(30)
+    df_change['Change90'] = df_change.groupby('Stock').AdjClose.pct_change(90)
+    df_change['Change180'] = df_change.groupby('Stock').AdjClose.pct_change(180)
+    df_change['Change360'] = df_change.groupby('Stock').AdjClose.pct_change(360)
+    return df_change
