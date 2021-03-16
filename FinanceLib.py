@@ -9,6 +9,9 @@ import os
 import sys
 from datetime import timedelta, date
 import logging
+import numpy as np
+import seaborn as sns
+import scipy.stats
 
 from mpl_finance import candlestick_ohlc
 import matplotlib.dates as mdates
@@ -219,7 +222,7 @@ def GetMAPlot(df_input, Stock, WindowValue=100, MinPerValue = 0):
 def GetAdjCloseInCol(tickers_list, df):
     data = pd.DataFrame(columns=tickers_list)
     for ticker in tickers_list:
-        data[ticker] = df['AdjClose']
+        data[ticker] =  df[df['Stock']==ticker]['AdjClose']
     return data
 
 def GetPctChange(df):
@@ -232,3 +235,92 @@ def GetPctChange(df):
     df_change['Change180'] = df_change.groupby('Stock').AdjClose.pct_change(180)
     df_change['Change360'] = df_change.groupby('Stock').AdjClose.pct_change(360)
     return df_change
+
+def GetReturns(data):
+    return data.pct_change()
+
+def GetTotalReturns(data):
+    returns = data.pct_change()
+    returns.reset_index(drop=True, inplace=True)
+    return (((returns+1).prod()-1)*100).round(2)
+
+def skewness(r):
+    """
+    Alternative to scipy.stats.skew()
+    Computes the skewness of the supplied Series or DataFrame
+    Returns a float or a Series
+    Коэффициент асимметрии - Величина, характеризующая асимметрию распределения данной 
+    случайной величины
+    """
+    demeaned_r = r - r.mean()
+    # use the population standard deviation, so set dof=0
+    sigma_r = r.std(ddof=0)
+    exp = (demeaned_r**3).mean()
+    return exp/sigma_r**3
+
+
+def kurtosis(r):
+    """
+    Alternative to scipy.stats.kurtosis()
+    Computes the kurtosis of the supplied Series or DataFrame
+    Returns a float or a Series
+    Коэффициент эксцесса - Мера остроты пика распределения случайной величины
+    """
+    demeaned_r = r - r.mean()
+    # use the population standard deviation, so set dof=0
+    sigma_r = r.std(ddof=0)
+    exp = (demeaned_r**4).mean()
+    return exp/sigma_r**4
+
+
+def compound(r):
+    """
+    returns the result of compounding the set of returns in r
+    """
+    return np.expm1(np.log1p(r).sum())
+
+                         
+def annualize_rets(r, periods_per_year):
+    """
+    Annualizes a set of returns
+    We should infer the periods per year
+    but that is currently left as an exercise
+    to the reader :-)
+    """
+    compounded_growth = (1+r).prod()
+    n_periods = r.shape[0]
+    return compounded_growth**(periods_per_year/n_periods)-1
+
+
+def annualize_vol(r, periods_per_year):
+    """
+    Annualizes the vol of a set of returns
+    We should infer the periods per year
+    but that is currently left as an exercise
+    to the reader :-)
+    """
+    return r.std()*(periods_per_year**0.5)
+
+
+def sharpe_ratio(r, riskfree_rate, periods_per_year):
+    """
+    Computes the annualized sharpe ratio of a set of returns
+    """
+    # convert the annual riskfree rate to per period
+    rf_per_period = (1+riskfree_rate)**(1/periods_per_year)-1
+    excess_ret = r - rf_per_period
+    ann_ex_ret = annualize_rets(excess_ret, periods_per_year)
+    ann_vol = annualize_vol(r, periods_per_year)
+    return ann_ex_ret/ann_vol
+
+def is_normal(r, level=0.01):
+    """
+    Applies the Jarque-Bera test to determine if a Series is normal or not
+    Test is applied at the 1% level by default
+    Returns True if the hypothesis of normality is accepted, False otherwise
+    """
+    if isinstance(r, pd.DataFrame):
+        return r.aggregate(is_normal)
+    else:
+        statistic, p_value = scipy.stats.jarque_bera(r)
+        return p_value > level
