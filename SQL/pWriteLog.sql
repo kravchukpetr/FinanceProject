@@ -1,41 +1,35 @@
-USE [Finance]
-GO
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[pWriteLog]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].pWriteLog
-GO
-create procedure pWriteLog
-@TypeWrite int, 
-@WF_ID int, 
-@WF_STATUS int, 
-@CNT_ERRORS int = 0,
-@LogTxt varchar(8000) = NULL
-as
+drop procedure if exists wf.pLoadQuote;
+CREATE procedure wf.pWriteLog(
+v_TypeWrite int, 
+v_WF_ID int, 
+v_WF_STATUS int, 
+v_CNT_ERRORS int = 0,
+v_LogTxt varchar(8000) = NULL
+)
+language plpgsql
+as $$
+DECLARE v_ID bigint;
 begin
 
-DECLARE @ID bigint
-
-IF @TypeWrite = 1
-BEGIN
-	INSERT INTO WorkFlowLogs
+IF v_TypeWrite = 1 THEN
+	INSERT INTO wf.WorkFlowLogs
 	(
 	WF_ID, 
 	WF_STATUS 
 	)
-	SELECT @WF_ID, @WF_STATUS
-END
+	SELECT v_WF_ID, v_WF_STATUS;
+END IF;
 
-IF @TypeWrite = 2
-BEGIN
+IF v_TypeWrite = 2 THEN
 	
-	SELECT @ID = MAX(ID) FROM WorkFlowLogs WHERE WF_ID = @WF_ID
+	SELECT v_ID = MAX(ID) FROM WorkFlowLogs WHERE WF_ID = v_WF_ID;
 
-	Update WorkFlowLogs
-	SET WF_STATUS = @WF_STATUS, 
-		CNT_ERRORS  = @CNT_ERRORS,
-		EndDt = getdate(),
-		LOG_TXT = @LogTxt
-	WHERE ID = @ID
-END
+	Update wf.WorkFlowLogs
+	SET WF_STATUS = v_WF_STATUS, 
+		CNT_ERRORS  = v_CNT_ERRORS,
+		EndDt = now(),
+		LOG_TXT = v_LogTxt
+	WHERE ID = v_ID;
+END IF;
 
-
-end
+end; $$

@@ -1,25 +1,22 @@
-USE [Finance]
-GO
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[pLoadQuote]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].[pLoadQuote]
-GO
-create procedure pLoadQuote
-@Dt date,
-@Stock varchar(10),
-@OpenValue numeric(20,6),	
-@HighValue numeric(20,6),	
-@LowValue  numeric(20,6),
-@CloseValue numeric(20,6),	
-@AdjClose numeric(20,6),	
-@Volume numeric(20,6)
-as
+drop procedure if exists finance.pLoadQuote;
+CREATE procedure finance.pLoadQuote(
+v_Dt date,
+v_Stock varchar(10),
+v_OpenValue numeric(20,6),	
+v_HighValue numeric(20,6),	
+v_LowValue  numeric(20,6),
+v_CloseValue numeric(20,6),	
+v_AdjClose numeric(20,6),	
+v_Volume numeric(20,6)
+)
+language plpgsql
+as $$
 begin
-IF EXISTS(SELECT 1 FROM Quotes WHERE Dt = @Dt AND Stock = @Stock)
-BEGIN
-	DELETE FROM Quotes WHERE Dt = @Dt AND Stock = @Stock	
-END
+IF EXISTS(SELECT 1 FROM finance.Quotes WHERE Dt = v_Dt AND Stock = v_Stock) THEN
+	DELETE FROM finance.Quotes WHERE Dt = v_Dt AND Stock = v_Stock;
+END IF;
 
-INSERT INTO Quotes
+INSERT INTO finance.Quotes
 	(
 	Dt,
 	Stock,
@@ -30,15 +27,13 @@ INSERT INTO Quotes
 	AdjClose,	
 	Volume
 	)
-	SELECT @Dt,
-	@Stock,
-	@OpenValue,	
-	@HighValue,	
-	@LowValue,
-	@CloseValue,	
-	@AdjClose,	
-	@Volume
+	SELECT v_Dt,
+	v_Stock,
+	v_OpenValue,	
+	v_HighValue,	
+	v_LowValue,
+	v_CloseValue,	
+	v_AdjClose,	
+	v_Volume;
 
-
-
-end
+end; $$

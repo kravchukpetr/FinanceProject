@@ -7,4 +7,4 @@ import os
 
 fname = os.path.dirname(os.path.realpath(__file__)).replace("\\","/") + '/' + 'DB.config'
 log_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\","/")
-fl.DailyUpdateQuote(fname, log_dir)
+fl.daily_update_quote(log_dir)

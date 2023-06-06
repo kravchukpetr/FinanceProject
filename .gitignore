@@ -4,5 +4,9 @@
 .Ruserdata
 .jpeg
 .png
-.config
-.pyc
+*.config
+*.pyc
+.idea
+SQL/.dbeaver/*
+*.ipynb_checkpoints/*
+SQL/.project

@@ -1,1 +1,0 @@
-/projects/finance/run_daily.sh

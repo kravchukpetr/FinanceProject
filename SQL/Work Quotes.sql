@@ -15,7 +15,7 @@ from Stock
 group by ISLoad
 
 
-ALTER TABLE Stock ADD IsLoad int default 1
+ALTER TABLE finance.Stock ADD IsLoad int default 1
 
 
 select * from Stock
@@ -60,3 +60,21 @@ group by Stock
 
 
 select * from WorkFlowLogs
+
+call finance.pLoadStockList('MMM', '3M' , 'Industrials', 'Industrial Conglomerates');
+
+CALL finance.pLoadStockList('MMM', '3M' , 'Industrials', 'Industrial Conglomerates');
+
+select * from finance.stock;
+select count(*) from finance.stock;
+
+drop table finance.stock;
+commit;
+
+
+select * from finance.quotes q ;
+select count(*) from finance.quotes;
+
+select * from finance.pGetStockList(null, 1);
+
+--select * from finance.Stock

@@ -1,20 +1,28 @@
-USE [Finance]
-GO
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[pGetStockList]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].[pGetStockList]
-GO
-create procedure pGetStockList
-@Market varchar(10) =  NULL,
-@IsLoad int = 1
-as
+drop function if exists finance.pGetStockList;
+CREATE function finance.pGetStockList(
+v_Market varchar(10) =  NULL,
+v_IsLoad int = 1
+)
+returns TABLE ( Stock varchar(10),
+				Security varchar(300),
+				Sector varchar(100),	
+				SubIndustry  varchar(100),
+				Market varchar(50),
+				LoadDt timestamp,
+				IsLoad int)
+language plpgsql
+as $$
 begin
-	IF @Market IS NOT NULL
-	BEGIN
-		select * from Stock WHERE Market = @Market AND IsLoad = @IsLoad
-	END
+	IF v_Market IS NOT NULL THEN
+		return query 	
+		SELECT * 
+		FROM finance.Stock 
+		WHERE Market = v_Market
+		AND IsLoad = v_IsLoad;
 	ELSE
-	BEGIN
-		select * from Stock WHERE IsLoad = @IsLoad
-	END
-
-end
+		return query 
+		SELECT * 
+		FROM finance.Stock 
+		WHERE IsLoad = v_IsLoad;
+	END IF;
+end; $$

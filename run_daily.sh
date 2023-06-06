@@ -1,1 +1,0 @@
-python3 /projects/finance/RunDailyFinance.py

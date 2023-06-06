@@ -1,9 +1,7 @@
-use Finance
-go
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Quotes]') AND type in (N'U', N'V'))
-DROP TABLE [dbo].[Quotes]
-go
-create table Quotes
+create schema if not exists finance;
+
+drop table if exists finance.Quotes;
+create table if not exists  finance.Quotes
 (
 Dt date,
 Stock varchar(10),
@@ -13,54 +11,47 @@ LowValue  numeric(20,6),
 CloseValue numeric(20,6),	
 AdjClose numeric(20,6),	
 Volume numeric(20,6),
-LoadDt datetime default getdate(),
+LoadDt timestamp default now(),
 primary key (Dt, Stock)
-)
+);
 
-go
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Stock]') AND type in (N'U', N'V'))
-DROP TABLE [dbo].[Stock]
-go
-create table Stock
+drop table if exists finance.Stock;
+create table if not exists  finance.Stock
 (
 Stock varchar(10),
 Security varchar(300),
 Sector varchar(100),	
 SubIndustry  varchar(100),
 Market varchar(50),
-LoadDt datetime default getdate(),
+LoadDt timestamp default now(),
+IsLoad int default,
 primary key (Stock)
-)
-go
+);
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[WorkFlowLogs]') AND type in (N'U', N'V'))
-DROP TABLE [dbo].[WorkFlowLogs]
-go
-create table WorkFlowLogs
+create schema if not exists wf;
+
+drop table if exists wf.Stock;
+create table if not exists wf.WorkFlowLogs
 (
-ID bigint IDENTITY(1,1),
+ID serial,
 WF_ID int, 
 WF_STATUS int, 
 CNT_ERRORS int,
-LoadDt datetime default getdate(),
-EndDt datetime,
+LoadDt timestamp default now(),
+EndDt timestamp,
 LOG_TXT VARCHAR(8000),
 primary key (ID)
-)
-go
+);
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[WorkFlows]') AND type in (N'U', N'V'))
-DROP TABLE [dbo].[WorkFlows]
-go
-create table WorkFlows
+drop table if exists wf.WorkFlows;
+create table  if not exists wf.WorkFlows
 (
-WF_ID int IDENTITY(1,1), 
+WF_ID serial, 
 WF_SC VARCHAR(100), 
 WF_NM VARCHAR(500), 
 primary key (WF_ID)
-)
-go
+);
 
-INSERT INTO  WorkFlows (WF_SC, WF_NM) SELECT 'FinanceDailyLoad', '≈жедневна€ загрузка данных по котировкам'
+INSERT INTO  wf.WorkFlows (WF_SC, WF_NM) SELECT 'FinanceDailyLoad', '≈жедневна€ загрузка данных по котировкам';
 
 

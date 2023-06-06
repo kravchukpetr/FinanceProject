@@ -1,0 +1,2 @@
+--через cmd на работе
+C:\ProgramData\Anaconda3\python.exe RunDailyFinance.py

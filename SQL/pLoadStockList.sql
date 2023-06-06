@@ -1,30 +1,24 @@
-USE [Finance]
-GO
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[pLoadStockList]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].pLoadStockList
-GO
-create procedure pLoadStockList
-@Stock varchar(10),
-@Security varchar(300),
-@Sector varchar(100),
-@SubIndustry varchar(100)
-as
+drop procedure if exists finance.pLoadStockList;
+CREATE procedure finance.pLoadStockList(
+v_Stock varchar(10),
+v_Security varchar(300),
+v_Sector varchar(100),
+v_SubIndustry varchar(100)
+)
+language plpgsql
+as $$
 begin
-
-IF NOT EXISTS (SELECT 1 FROM Stock WHERE Stock = @Stock)
-BEGIN
-
-	INSERT INTO Stock
-	(
-	Stock,
-	Security,
-	Sector,	
-	SubIndustry 
-	)
-	SELECT @Stock,
-		   @Security,
-		   @Sector,
-		   @SubIndustry
-	END
-
-end
+	if NOT EXISTS (SELECT 1 FROM finance.Stock WHERE Stock = v_Stock) then 
+		INSERT INTO finance.Stock
+		(
+		Stock,
+		Security,
+		Sector,	
+		SubIndustry 
+		)
+		SELECT v_Stock,
+			   v_Security,
+			   v_Sector,
+			   v_SubIndustry;
+	end if;
+end; $$
