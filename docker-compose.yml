@@ -29,6 +29,11 @@ services:
     ports:
       - "5455:5432"
 
+  pg_admins:
+    image: thajeztah/pgadmin4
+    ports:
+      - "5050:5050"
+
   airflow-init:
     << : *airflow-common
     container_name: airflow_init
