@@ -6,6 +6,8 @@ from pandas.api.types import (
     is_numeric_dtype,
     is_object_dtype,
 )
+from tradernet import NtApi
+import os
 
 st.title("Auto Filter Dataframes in Streamlit")
 
@@ -94,7 +96,11 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-df = pd.read_csv(
-    "https://raw.githubusercontent.com/mcnakhaee/palmerpenguins/master/palmerpenguins/data/penguins.csv"
-)
+pub_ = os.environ['FREEDOM_PUBLIC_KEY']
+sec_ = os.environ['FREEDOM_SECRET_KEY']
+
+res = NtApi(pub_, sec_, NtApi.V2)
+json_position = res.sendRequest('getPositionJson')
+df = pd.DataFrame(json_position['result']['ps']['pos'])
+
 st.dataframe(filter_dataframe(df))
