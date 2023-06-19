@@ -15,14 +15,14 @@ as $$
 begin
 	IF v_Market IS NOT NULL THEN
 		return query 	
-		SELECT * 
-		FROM finance.Stock 
+		SELECT s.Stock, s.Security, s.Sector, s.SubIndustry, s.Market, s.LoadDt, s.IsLoad 
+		FROM finance.Stock s
 		WHERE Market = v_Market
-		AND IsLoad = v_IsLoad;
+		AND s.IsLoad = v_IsLoad;
 	ELSE
 		return query 
-		SELECT * 
-		FROM finance.Stock 
-		WHERE IsLoad = v_IsLoad;
+		SELECT s.Stock, s.Security, s.Sector, s.SubIndustry, s.Market, s.LoadDt, s.IsLoad 
+		FROM finance.Stock s
+		WHERE s.IsLoad = v_IsLoad;
 	END IF;
 end; $$

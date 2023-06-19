@@ -143,6 +143,7 @@ def get_all_stock_by_period(dt_from, dt_to, logger, sleep_time = 5, is_debug = 0
     num_ticker = 0
     for ind, row in stock_df.iterrows():
         try:
+            print(row.values[0])
             save_stock_quote_to_db(row.values[0], dt_from, dt_to)
             logging.info(row.values[0] + ' Success')
             time.sleep(sleep_time) 

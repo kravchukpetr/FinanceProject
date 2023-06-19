@@ -1,3 +1,4 @@
 cd D:/Projects
 source finance-venv/Scripts/activate
 export PG_PWD=
+
