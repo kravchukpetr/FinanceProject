@@ -2,11 +2,21 @@ exec pLoadQuote '2018-12-31 00:00:00', 'AAPL' , 39.63249969482422, 39.8400001525
 
 select * from Quotes order by Dt desc
 
-select count(*) from Quotes
+select count(*) from finance.Quotes;
+select stock, count(*) from finance.Quotes group by stock;
 
-exec pLoadStockList 'DPZ', 'Domino''s Pizza' , 'Consumer Discretionary', 'Restaurants'
+call finance.pLoadStockList('DPZ', 'Domino''s Pizza' , 'Consumer Discretionary', 'Restaurants')
 
-select * from Stock
+
+select * from finance.pGetStockList(NULL);
+
+select * 
+from finance.Stock
+limit 100;
+
+select * 
+from finance.Quotes
+limit 100;
 
 select * from Stock
 
