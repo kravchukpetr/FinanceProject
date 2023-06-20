@@ -14,6 +14,7 @@ import pickle
 import psycopg2
 from mpl_finance import candlestick_ohlc
 import matplotlib.dates as mdates
+from tradingview_ta import TA_Handler, Interval, Exchange
 
 CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)).replace("\\","/") + '/' + 'DB.config'
 LOG_DIR = os.path.dirname(os.path.realpath(__file__)).replace("\\","/")
@@ -64,6 +65,118 @@ def save_stock_quote_to_db(stock, date_from, date_to):
         result = 1
     return result
 
+
+def get_df_recomendation(stock, screener):
+    """
+    Get recomendation from trading view API and return pandas dataframe
+    """
+    print(stock)
+    if screener == "america":
+        df = pd.DataFrame()
+        for interval in [Interval.INTERVAL_1_DAY, Interval.INTERVAL_1_WEEK, Interval.INTERVAL_1_MONTH]:
+            try:
+                ticker = TA_Handler(
+                    symbol=stock,
+                    screener="america",
+                    exchange="NASDAQ",
+                    interval=interval
+                )
+                print(interval, ticker.get_analysis().summary)
+                df_tmp = pd.DataFrame([ticker.get_analysis().summary])
+                df_tmp['period'] = interval
+                df = pd.concat([df, df_tmp])
+                is_found = True
+            except:
+                pass
+            if not is_found:
+                try:
+                    ticker = TA_Handler(
+                        symbol=stock,
+                        screener="america",
+                        exchange="NYSE",
+                        interval=interval
+                    )
+                    print(interval, ticker.get_analysis().summary)
+                    df_tmp = pd.DataFrame([ticker.get_analysis().summary])
+                    df_tmp['period'] = interval
+                    df = pd.concat([df, df_tmp])
+                except Exception:
+                    print("Not parsed")
+    elif screener == "Forex":
+        df = pd.DataFrame()
+        for interval in [Interval.INTERVAL_1_DAY, Interval.INTERVAL_1_WEEK, Interval.INTERVAL_1_MONTH]:
+            ticker = TA_Handler(
+                symbol=stock,
+                screener=screener,
+                exchange="FX_IDC",
+                interval=interval
+            )
+            print(interval, ticker.get_analysis().summary)
+            df_tmp = pd.DataFrame([ticker.get_analysis().summary])
+            df = pd.concat([df, df_tmp])
+    return df
+
+
+def save_stock_recomendation_to_db(stock, screener):
+    """
+    Save tradingview recomendation to db
+    """
+    conn = get_conn_to_pg()
+    try:
+        df = get_df_recomendation(stock, screener)
+        df_to_lst = df.reset_index().values.tolist()
+    except Exception as e:
+        print(stock + ' Error in load quotes from datasource: ' + str(e))
+        result = 1
+        return None
+    cursor = conn.cursor()
+    try:
+        for row in df_to_lst:
+            period = row[5]
+            recomendation = row[1]
+            buy_count = row[2]
+            sell_count = row[3]
+            neutral_count = row[4]
+            query = f"CALL finance.p_load_recomendation('{stock}', {period}, {recomendation}, {buy_count}, {sell_count}, {neutral_count})"
+            cursor.execute(query)
+        conn.commit()
+        conn.close()
+        result = 0
+    except Exception as e:
+        print(stock + 'Error in save data to database: ' + str(e))
+        result = 1
+    return result
+
+
+def get_all_stock_recomendation(logger, sleep_time=3, is_debug=0):
+    """
+    Get recomendation for all stocks and save to db
+    """
+    stock_df = get_stock_list_from_db()
+    cnt_error = 0
+    lst_error = []
+    result_dic = {}
+    num_ticker = 0
+    for ind, row in stock_df.iterrows():
+        try:
+            print(row.values[0])
+            save_stock_recomendation_to_db(row.values[0], "america")
+            logging.info(row.values[0] + ' Success')
+            time.sleep(sleep_time)
+        except Exception as e:
+            cnt_error += 1
+            lst_error.append(row.values[0])
+            logging.info(row.values[0] + ' Error: ' + str(e))
+        if is_debug == 1 and num_ticker == 5:
+            break
+        num_ticker += 1
+
+    state = 3 if cnt_error == 0 else 4
+
+    result_dic['State'] = state
+    result_dic['CntError'] = cnt_error
+    result_dic['lst_error'] = lst_error
+    return result_dic
 
 def GetStockQuoteFromDB(con, Stock, IsDtIndex = 1, IsStockIndex = 0, DateFrom = 'NULL', DateTo = 'NULL'):
     """

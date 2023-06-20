@@ -52,6 +52,18 @@ WF_NM VARCHAR(500),
 primary key (WF_ID)
 );
 
-INSERT INTO  wf.WorkFlows (WF_SC, WF_NM) SELECT 'FinanceDailyLoad', 'Ежедневная загрузка данных по котировкам';
+INSERT INTO  wf.WorkFlows (WF_SC, WF_NM) SELECT 'FinanceDailyLoad', 'пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ';
+
+
+drop table if exists finance.recomendation;
+create table finance.recomendation(
+loaddt timestamp default now(),
+stock varchar(100),
+period varchar(10),
+recomendation varchar(10),
+buy_count int,
+sell_count int,
+neutral_count int
+)
 
 
