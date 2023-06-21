@@ -1,1 +1,1 @@
-FROM apache/airflow:2.3.3
+FROM apache/airflow:2.6.2

@@ -66,67 +66,38 @@ def save_stock_quote_to_db(stock, date_from, date_to):
     return result
 
 
-def get_df_recomendation(stock, screener):
+def get_df_recomendation(stock, screener, exchange):
     """
-    Get recomendation from trading view API and return pandas dataframe
+    Get recomendation data from trading view API and return pandas dataframe
     """
-    print(stock)
-    if screener == "america":
-        df = pd.DataFrame()
-        for interval in [Interval.INTERVAL_1_DAY, Interval.INTERVAL_1_WEEK, Interval.INTERVAL_1_MONTH]:
-            try:
-                ticker = TA_Handler(
-                    symbol=stock,
-                    screener="america",
-                    exchange="NASDAQ",
-                    interval=interval
-                )
-                print(interval, ticker.get_analysis().summary)
-                df_tmp = pd.DataFrame([ticker.get_analysis().summary])
-                df_tmp['period'] = interval
-                df = pd.concat([df, df_tmp])
-                is_found = True
-            except:
-                pass
-            if not is_found:
-                try:
-                    ticker = TA_Handler(
-                        symbol=stock,
-                        screener="america",
-                        exchange="NYSE",
-                        interval=interval
-                    )
-                    print(interval, ticker.get_analysis().summary)
-                    df_tmp = pd.DataFrame([ticker.get_analysis().summary])
-                    df_tmp['period'] = interval
-                    df = pd.concat([df, df_tmp])
-                except Exception:
-                    print("Not parsed")
-    elif screener == "Forex":
-        df = pd.DataFrame()
-        for interval in [Interval.INTERVAL_1_DAY, Interval.INTERVAL_1_WEEK, Interval.INTERVAL_1_MONTH]:
+    df = pd.DataFrame()
+    for interval in [Interval.INTERVAL_1_DAY, Interval.INTERVAL_1_WEEK, Interval.INTERVAL_1_MONTH]:
+        try:
             ticker = TA_Handler(
                 symbol=stock,
                 screener=screener,
-                exchange="FX_IDC",
+                exchange=exchange,
                 interval=interval
             )
-            print(interval, ticker.get_analysis().summary)
+            # print(interval, ticker.get_analysis().summary)
             df_tmp = pd.DataFrame([ticker.get_analysis().summary])
+            df_tmp['period'] = interval
             df = pd.concat([df, df_tmp])
+        except Exception:
+            pass
     return df
 
 
-def save_stock_recomendation_to_db(stock, screener):
+def save_stock_recomendation_to_db(stock, screener, exchange):
     """
-    Save tradingview recomendation to db
+    Save tradingview recomendation by stock to db
     """
     conn = get_conn_to_pg()
     try:
-        df = get_df_recomendation(stock, screener)
+        df = get_df_recomendation(stock, screener, exchange)
         df_to_lst = df.reset_index().values.tolist()
     except Exception as e:
-        print(stock + ' Error in load quotes from datasource: ' + str(e))
+        print(stock + ' Error in load recomendation from datasource: ' + str(e))
         result = 1
         return None
     cursor = conn.cursor()
@@ -137,18 +108,19 @@ def save_stock_recomendation_to_db(stock, screener):
             buy_count = row[2]
             sell_count = row[3]
             neutral_count = row[4]
-            query = f"CALL finance.p_load_recomendation('{stock}', {period}, {recomendation}, {buy_count}, {sell_count}, {neutral_count})"
+            query = f"CALL finance.p_load_recomendation('{stock}', '{period}', '{recomendation}', {buy_count}, {sell_count}, {neutral_count})"
             cursor.execute(query)
         conn.commit()
         conn.close()
         result = 0
     except Exception as e:
         print(stock + 'Error in save data to database: ' + str(e))
+        print(query)
         result = 1
     return result
 
 
-def get_all_stock_recomendation(logger, sleep_time=3, is_debug=0):
+def get_all_stock_recomendation(logger, sleep_time=2, is_debug=0):
     """
     Get recomendation for all stocks and save to db
     """
@@ -158,9 +130,12 @@ def get_all_stock_recomendation(logger, sleep_time=3, is_debug=0):
     result_dic = {}
     num_ticker = 0
     for ind, row in stock_df.iterrows():
+        stock = row.values[0]
+        screener = row.values[7]
+        exchange = row.values[4]
+        print(stock)
         try:
-            print(row.values[0])
-            save_stock_recomendation_to_db(row.values[0], "america")
+            save_stock_recomendation_to_db(stock, screener, exchange)
             logging.info(row.values[0] + ' Success')
             time.sleep(sleep_time)
         except Exception as e:
@@ -240,7 +215,7 @@ def get_stock_list_from_db(market=None):
 
     conn = get_conn_to_pg()
     market_str = f"'{market}'" if market else'NULL'
-    query = f"select * from finance.pGetStockList({market_str})"
+    query = f"select * from finance.p_get_stock_list({market_str})"
     df = pd.read_sql(query, conn)
     return df
 

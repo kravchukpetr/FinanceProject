@@ -22,7 +22,8 @@ Stock varchar(10),
 Security varchar(300),
 Sector varchar(100),	
 SubIndustry  varchar(100),
-Market varchar(50),
+Exchange varchar(50),
+Screener varchar(30)
 LoadDt timestamp default now(),
 IsLoad int default 1,
 primary key (Stock)
@@ -60,7 +61,7 @@ create table finance.recomendation(
 loaddt timestamp default now(),
 stock varchar(100),
 period varchar(10),
-recomendation varchar(10),
+recomendation varchar(50),
 buy_count int,
 sell_count int,
 neutral_count int

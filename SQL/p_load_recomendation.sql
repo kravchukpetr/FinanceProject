@@ -2,7 +2,7 @@ drop procedure if exists finance.p_load_recomendation;
 CREATE procedure finance.p_load_recomendation(
 v_stock varchar(10),
 v_period varchar(10),
-v_recomendation varchar(10),
+v_recomendation varchar(50),
 v_buy_count int,
 v_sell_count int,
 v_neutral_count int
