@@ -1,5 +1,5 @@
-drop function if exists finance.p_get_stock_list;
-CREATE function finance.p_get_stock_list(
+drop function if exists finance.f_get_stock_list;
+CREATE function finance.f_get_stock_list(
 v_Market varchar(10) =  NULL,
 v_IsLoad int = 1
 )
@@ -19,11 +19,11 @@ begin
 		SELECT s.Stock, s.Security, s.Sector, s.SubIndustry, s.Exchange, s.LoadDt, s.IsLoad, s.Screener
 		FROM finance.Stock s
 		WHERE Market = v_Market
-		AND s.IsLoad = v_IsLoad;
+		AND s.is_load = v_IsLoad;
 	ELSE
 		return query 
 		SELECT s.Stock, s.Security, s.Sector, s.SubIndustry, s.Exchange, s.LoadDt, s.IsLoad, s.Screener
 		FROM finance.Stock s
-		WHERE s.IsLoad = v_IsLoad;
+		WHERE s.is_load = v_IsLoad;
 	END IF;
 end; $$

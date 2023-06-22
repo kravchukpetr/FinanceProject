@@ -1,5 +1,5 @@
-drop procedure if exists finance.pLoadStockList;
-CREATE procedure finance.pLoadStockList(
+drop procedure if exists finance.p_load_stock_list;
+CREATE procedure finance.p_load_stock_list(
 v_Stock varchar(10),
 v_Security varchar(300),
 v_Sector varchar(100),

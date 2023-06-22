@@ -25,7 +25,8 @@ SubIndustry  varchar(100),
 Exchange varchar(50),
 Screener varchar(30)
 LoadDt timestamp default now(),
-IsLoad int default 1,
+is_load int default 1,
+is_avaible_for_trade int default 1
 primary key (Stock)
 );
 

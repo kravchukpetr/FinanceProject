@@ -35,6 +35,8 @@ rec_1m as (
 result_rec as (
 select rec_1d.stock,
 	   s."security",
+       s.exchange,
+	   s.screener,
 	   rec_1d.recomendation as rec_1d,
 	   rec_1w.recomendation as rec_1w,
 	   rec_1m.recomendation as rec_1m,
@@ -48,9 +50,10 @@ select rec_1d.stock,
 	   rec_1m.sell_count as sell_count_1m,
 	   rec_1m.neutral_count as neutral_count_1m
 from rec_1d
+join finance.stock s on rec_1d.stock = s.stock
 left join rec_1w on rec_1d.stock = rec_1w.stock
 left join rec_1m on rec_1d.stock = rec_1m.stock
-left join finance.stock s on rec_1d.stock = s.stock
+where s.is_avaible_for_trade = 1
 )
 select *
 from result_rec

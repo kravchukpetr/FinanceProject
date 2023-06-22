@@ -37,7 +37,6 @@ def get_conn_to_pg():
 
 
 def save_stock_quote_to_db(stock, date_from, date_to):
-    conn = get_conn_to_pg()
     try:
         data = yf.download(stock, date_from, date_to)
         df_to_lst = data.reset_index().values.tolist()
@@ -45,6 +44,7 @@ def save_stock_quote_to_db(stock, date_from, date_to):
         print(stock + ' Error in load quotes from datasource: ' + str(e))
         result = 1
         return None
+    conn = get_conn_to_pg()
     cursor = conn.cursor()
     try:
         for row in df_to_lst:
@@ -55,7 +55,7 @@ def save_stock_quote_to_db(stock, date_from, date_to):
             close = row[4]
             adj_close = row[5]
             volume = row[6]
-            query = f"CALL finance.pLoadQuote('{date}', '{stock}', {open}, {high}, {low}, {close}, {adj_close}, {volume})"
+            query = f"CALL finance.p_load_quote('{date}', '{stock}', {open}, {high}, {low}, {close}, {adj_close}, {volume})"
             cursor.execute(query)
         conn.commit()
         conn.close()
@@ -162,7 +162,7 @@ def GetStockQuoteFromDB(con, Stock, IsDtIndex = 1, IsStockIndex = 0, DateFrom = 
     DateFromStr = DateFrom if DateFrom == 'NULL' else "'" + DateFrom + "'"
     DateToStr = DateTo if DateTo == 'NULL' else "'" + DateTo + "'"
 
-    query = "exec pGetQuote " + DateFromStr + ", " + DateToStr + ", " + StockStr
+    query = "exec p_get_quote " + DateFromStr + ", " + DateToStr + ", " + StockStr
     
     lst_index = []
     # if Stock.find(',') > 0:
@@ -200,7 +200,7 @@ def save_sp500_tickers():
         security = ticker[1]
         sector = ticker[2]
         sub_industry = ticker[3]
-        query = ("CALL finance.pLoadStockList('" + str(stock) + "', '" + str(security) + "' , '" + str(sector) + "', '" + str(sub_industry) + "');")
+        query = ("CALL finance.p_load_stock_list('" + str(stock) + "', '" + str(security) + "' , '" + str(sector) + "', '" + str(sub_industry) + "');")
         print(query)
         cursor.execute(query)
     conn.commit()
@@ -215,7 +215,7 @@ def get_stock_list_from_db(market=None):
 
     conn = get_conn_to_pg()
     market_str = f"'{market}'" if market else'NULL'
-    query = f"select * from finance.p_get_stock_list({market_str})"
+    query = f"select * from finance.f_get_stock_list({market_str})"
     df = pd.read_sql(query, conn)
     return df
 
@@ -251,17 +251,18 @@ def get_all_stock_by_period(dt_from, dt_to, logger, sleep_time = 5, is_debug = 0
     return result_dic
 
 
-def daily_update_quote(sleep_time=5, is_debug=0):
+def daily_update_quote(dt_from=None, sleep_time=5, is_debug=0):
     """
     Daily update all quotes
     """
-    conn = get_conn_to_pg()
+    # conn = get_conn_to_pg()
 
     today_dt = date.today().strftime('%Y%m%d')    
     log_dir = LOG_DIR + '/logs/' + today_dt
 
     dt_to = date.today()
-    dt_from = date.today() + datetime.timedelta(days=-2)
+    if not dt_from:
+        dt_from = date.today() + datetime.timedelta(days=-3)
 
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)

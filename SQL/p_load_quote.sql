@@ -1,5 +1,5 @@
-drop procedure if exists finance.pLoadQuote;
-CREATE procedure finance.pLoadQuote(
+drop procedure if exists finance.p_load_quote;
+CREATE procedure finance.p_load_quote(
 v_Dt date,
 v_Stock varchar(10),
 v_OpenValue numeric(20,6),	
