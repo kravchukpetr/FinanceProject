@@ -8,7 +8,8 @@ select stock, count(*) from finance.Quotes group by stock;
 call finance.pLoadStockList('DPZ', 'Domino''s Pizza' , 'Consumer Discretionary', 'Restaurants')
 
 
-select * from finance.pGetStockList(NULL);
+select * from finance.f_get_stock_list('Forex');
+select * from finance.f_get_stock_list();
 
 select * 
 from finance.Stock
