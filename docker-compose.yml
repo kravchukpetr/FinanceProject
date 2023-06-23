@@ -56,7 +56,7 @@ services:
     << : *airflow-common
     command: airflow webserver
     ports:
-      - 8085:8080
+      - 8080:8080
     container_name: airflow_webserver
     restart: always
 
