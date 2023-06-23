@@ -1,4 +1,4 @@
-drop procedure if exists wf.pLoadQuote;
+drop procedure if exists wf.pWriteLog;
 CREATE procedure wf.pWriteLog(
 v_TypeWrite int, 
 v_WF_ID int, 
@@ -32,4 +32,4 @@ IF v_TypeWrite = 2 THEN
 	WHERE ID = v_ID;
 END IF;
 
-end; $$
+end; $$;

@@ -27,4 +27,4 @@ begin
 		FROM finance.Stock s
 		WHERE s.is_load = v_IsLoad;
 	END IF;
-end; $$
+end; $$;

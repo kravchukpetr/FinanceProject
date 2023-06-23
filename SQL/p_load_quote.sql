@@ -36,4 +36,4 @@ INSERT INTO finance.Quotes
 	v_AdjClose,	
 	v_Volume;
 
-end; $$
+end; $$;

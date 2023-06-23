@@ -30,4 +30,4 @@ begin
 		FROM Quotes q
 		WHERE q.dt between v_dt_from AND v_dt_to;
 	end if;
-end; $$
+end; $$;

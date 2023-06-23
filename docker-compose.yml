@@ -9,10 +9,10 @@ x-airflow-common:
     - AIRFLOW__CORE__LOAD_EXAMPLES=False
     - AIRFLOW__CORE__LOGGING_LEVEL=INFO
   volumes:
-    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow-data/dags:/opt/airflow/dags
     - ./airflow-data/logs:/opt/airflow/logs
     - ./airflow-data/plugins:/opt/airflow/plugins
-    - ./airflow-data/airflow.cfg:/opt/airlfow/airflow.cfg
+    - ./airflow-data/config/airflow.cfg:/opt/airlfow/airflow.cfg
   depends_on:
     - postgres
 
@@ -28,6 +28,8 @@ services:
       - POSTGRES_PORT=5432
     ports:
       - "5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
 
   pg_admins:
     image: thajeztah/pgadmin4
@@ -54,7 +56,7 @@ services:
     << : *airflow-common
     command: airflow webserver
     ports:
-      - 8085:8080
+      - 8080:8080
     container_name: airflow_webserver
     restart: always
 

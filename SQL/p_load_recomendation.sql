@@ -26,4 +26,4 @@ INSERT INTO finance.recomendation(
             v_sell_count,
             v_neutral_count;
 
-end; $$
+end; $$;

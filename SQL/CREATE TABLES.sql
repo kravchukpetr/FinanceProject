@@ -23,10 +23,10 @@ Security varchar(300),
 Sector varchar(100),	
 SubIndustry  varchar(100),
 Exchange varchar(50),
-Screener varchar(30)
+Screener varchar(30),
 LoadDt timestamp default now(),
 is_load int default 1,
-is_avaible_for_trade int default 1
+is_avaible_for_trade int default 1,
 primary key (Stock)
 );
 
@@ -54,7 +54,7 @@ WF_NM VARCHAR(500),
 primary key (WF_ID)
 );
 
-INSERT INTO  wf.WorkFlows (WF_SC, WF_NM) SELECT 'FinanceDailyLoad', '���������� �������� ������ �� ����������';
+INSERT INTO  wf.WorkFlows (WF_SC, WF_NM) SELECT 'FinanceDailyLoad', 'Load Finance quotes';
 
 
 drop table if exists finance.recomendation;
@@ -66,6 +66,6 @@ recomendation varchar(50),
 buy_count int,
 sell_count int,
 neutral_count int
-)
+);
 
 
