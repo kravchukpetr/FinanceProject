@@ -13,4 +13,4 @@ SQL/.dbeaver/*
 SQL/.project
 logs/*
 */logs/*
-data/*.*
+data/*
