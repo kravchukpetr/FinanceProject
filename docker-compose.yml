@@ -12,7 +12,7 @@ x-airflow-common:
     - ./airflow-data/dags:/opt/airflow/dags
     - ./airflow-data/logs:/opt/airflow/logs
     - ./airflow-data/plugins:/opt/airflow/plugins
-    - ./airflow-data/config/airflow.cfg:/opt/airlfow/airflow.cfg
+    - ./airflow-data/config/:/opt/airlfow/config
   depends_on:
     - postgres
 
@@ -30,11 +30,6 @@ services:
       - "5432:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
-
-  pg_admins:
-    image: thajeztah/pgadmin4
-    ports:
-      - "5050:5050"
 
   airflow-init:
     << : *airflow-common
