@@ -1,0 +1,1 @@
+*/1 * * * * cd /py_cronjob && /usr/bin/python3.9 /opt/app/app.py >> cron_log.log 2>&1
