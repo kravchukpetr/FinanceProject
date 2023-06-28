@@ -22,7 +22,7 @@ END IF;
 
 IF v_TypeWrite = 2 THEN
 	
-	SELECT v_ID = MAX(ID) FROM WorkFlowLogs WHERE WF_ID = v_WF_ID;
+	SELECT v_ID = MAX(ID) FROM wf.WorkFlowLogs WHERE WF_ID = v_WF_ID;
 
 	Update wf.WorkFlowLogs
 	SET WF_STATUS = v_WF_STATUS, 

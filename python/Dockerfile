@@ -1,13 +1,14 @@
 FROM python:3.8
-COPY requirements.txt /usr/src/app/requirements.txt
-COPY ../FinanceLib.py /usr/src/app/FinanceLib.py
-COPY ./RunDailyFinance.py /usr/src/app/RunDailyFinance.py
-COPY ./DB.config /usr/src/app/DB.config
-WORKDIR /usr/src/app
+COPY requirements.txt /usr/src/requirements.txt
+WORKDIR /usr/src
 RUN apt-get update
 RUN apt-get install -y cron
+RUN apt-get install -y systemd
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+# Add the script to the Docker Image
+ADD run_finance.sh /usr/src/run_finance.sh
+RUN chmod 0775 /usr/src/run_finance.sh
 COPY crontab /etc/cron.d/crontab
 RUN crontab /etc/cron.d/crontab
-CMD ["cron","-f", "-l", "2"]
+CMD ["cron","-f"]

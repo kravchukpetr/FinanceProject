@@ -16,4 +16,6 @@ services:
   app:
     build: ./python
     volumes:
-      - ./lib:/opt/app
+      - ./app:/usr/src/app
+    environment:
+        PG_PWD: ${PG_PWD}

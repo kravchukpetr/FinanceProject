@@ -1,1 +1,1 @@
-0 1,13 * * * cd /usr/src/app && python /usr/src/app/RunDailyFinance.py >> cron_log.log 2>&1
+*/1 * * * * /usr/src/run_finance.sh >> /usr/src/app/logs/cron_log.log 2>&1
