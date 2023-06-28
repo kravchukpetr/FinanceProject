@@ -1,5 +1,20 @@
 create schema if not exists finance;
 
+drop table if exists finance.forex;
+create table if not exists  finance.forex
+(
+dt timestamp,
+Stock varchar(10),
+OpenValue numeric(20,6),
+HighValue numeric(20,6),
+LowValue  numeric(20,6),
+CloseValue numeric(20,6),
+AdjClose numeric(20,6),
+Volume numeric(20,6),
+LoadDt timestamp default now(),
+primary key (Dt, Stock)
+);
+
 drop table if exists finance.Quotes;
 create table if not exists  finance.Quotes
 (

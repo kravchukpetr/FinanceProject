@@ -36,33 +36,63 @@ def get_conn_to_pg():
     )
 
 
-def save_stock_quote_to_db(stock, date_from, date_to):
-    try:
-        data = yf.download(stock, date_from, date_to)
-        df_to_lst = data.reset_index().values.tolist()
-    except Exception as e:
-        print(stock + ' Error in load quotes from datasource: ' + str(e))
-        result = 1
-        return None
-    conn = get_conn_to_pg()
-    cursor = conn.cursor()
-    try:
-        for row in df_to_lst:
-            date = row[0]
-            open = row[1]
-            high = row[2]
-            low = row[3]
-            close = row[4]
-            adj_close = row[5]
-            volume = row[6]
-            query = f"CALL finance.p_load_quote('{date}', '{stock}', {open}, {high}, {low}, {close}, {adj_close}, {volume})"
-            cursor.execute(query)
-        conn.commit()
-        conn.close()
-        result = 0
-    except Exception as e:
-        print(stock + 'Error in save data to database: ' + str(e))
-        result = 1
+def save_stock_quote_to_db(stock, screener, date_from, date_to):
+    if screener == 'Forex':
+        try:
+            data = yf.Ticker(f"{stock}=x")
+            df_to_lst = data.history(period="1d", interval="1h").reset_index().values.tolist()
+        except Exception as e:
+            print(stock + ' Error in load quotes from datasource: ' + str(e))
+            result = 1
+            return None
+        conn = get_conn_to_pg()
+        cursor = conn.cursor()
+        try:
+            for row in df_to_lst:
+                date = row[0].strftime('%Y-%m-%d %H:%M:%S')
+                open = row[1]
+                high = row[2]
+                low = row[3]
+                close = row[4]
+                adj_close = row[4]
+                volume = row[5]
+                query = f"CALL finance.p_load_forex('{date}', '{stock}', {open}, {high}, {low}, {close}, {adj_close}, {volume})"
+                print(query)
+                cursor.execute(query)
+            conn.commit()
+            conn.close()
+            result = 0
+        except Exception as e:
+            print(stock + 'Error in save data to database: ' + str(e))
+            print(query)
+            result = 1
+    else:
+        try:
+            data = yf.download(stock, date_from, date_to)
+            df_to_lst = data.reset_index().values.tolist()
+        except Exception as e:
+            print(stock + ' Error in load quotes from datasource: ' + str(e))
+            result = 1
+            return None
+        conn = get_conn_to_pg()
+        cursor = conn.cursor()
+        try:
+            for row in df_to_lst:
+                date = row[0]
+                open = row[1]
+                high = row[2]
+                low = row[3]
+                close = row[4]
+                adj_close = row[5]
+                volume = row[6]
+                query = f"CALL finance.p_load_quote('{date}', '{stock}', {open}, {high}, {low}, {close}, {adj_close}, {volume})"
+                cursor.execute(query)
+            conn.commit()
+            conn.close()
+            result = 0
+        except Exception as e:
+            print(stock + 'Error in save data to database: ' + str(e))
+            result = 1
     return result
 
 
@@ -120,10 +150,17 @@ def save_stock_recomendation_to_db(stock, screener, exchange):
     return result
 
 
-def get_all_stock_recomendation(logger, sleep_time=2, is_debug=0):
+def get_all_stock_recomendation(sleep_time=2, is_debug=0):
     """
     Get recomendation for all stocks and save to db
     """
+    today_dt = date.today().strftime('%Y%m%d')
+    log_dir = LOG_DIR + '/logs/' + today_dt
+    logging.basicConfig(filename=log_dir + '/app.log', filemode='a+', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
+    logger = logging.getLogger()
+    logger.info('DailyUpdaterecomendation')
+    logger.info('log_dir: ' + log_dir)
+
     stock_df = get_stock_list_from_db()
     cnt_error = 0
     lst_error = []
@@ -232,7 +269,7 @@ def get_all_stock_by_period(dt_from, dt_to, logger, sleep_time = 5, is_debug = 0
     for ind, row in stock_df.iterrows():
         try:
             print(row.values[0])
-            save_stock_quote_to_db(row.values[0], dt_from, dt_to)
+            save_stock_quote_to_db(row.values[0], row.values[7], dt_from, dt_to)
             logging.info(row.values[0] + ' Success')
             time.sleep(sleep_time) 
         except Exception as e:
