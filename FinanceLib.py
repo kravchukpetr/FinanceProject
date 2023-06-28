@@ -449,4 +449,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    daily_update_quote()
