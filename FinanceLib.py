@@ -190,28 +190,32 @@ def get_all_stock_recomendation(sleep_time=2, is_debug=0):
     result_dic['lst_error'] = lst_error
     return result_dic
 
-def GetStockQuoteFromDB(con, Stock, IsDtIndex = 1, IsStockIndex = 0, DateFrom = 'NULL', DateTo = 'NULL'):
+
+def get_stock_quote_from_db(stock, screener, is_dt_index=1, is_stock_index=0, date_from=None, date_to=None):
     """
-    Возвращает котировки по акции из база SQL SERVER
+    Returns qultes from DB
     """
 
-    StockStr = Stock if Stock == 'NULL' else "'" + ', '.join(Stock) + "'"        
-    DateFromStr = DateFrom if DateFrom == 'NULL' else "'" + DateFrom + "'"
-    DateToStr = DateTo if DateTo == 'NULL' else "'" + DateTo + "'"
+    conn = get_conn_to_pg()
 
-    query = "exec p_get_quote " + DateFromStr + ", " + DateToStr + ", " + StockStr
-    
+    stock_str = "'" + stock + "'" if stock else "NULL"
+    date_from_str = "'" + date_from + "'" if date_from else "NULL"
+    date_to_str = "'" + date_to + "'" if date_to else "NULL"
+    screener_str = "'" + screener + "'"
+
+    query = f"select * from finance.f_get_quote ({date_from_str}, {date_to_str}, {stock_str}, {screener_str})"
+    print(query)
     lst_index = []
     # if Stock.find(',') > 0:
-    if IsDtIndex == 1:
-        lst_index.append('Dt')
-    if IsStockIndex == 1:
-        lst_index.append('Stock')
+    if is_dt_index == 1:
+        lst_index.append('dt')
+    if is_stock_index == 1:
+        lst_index.append('stock')
 
     if len(lst_index) > 0:
-        df = pd.read_sql(query, con, parse_dates='Dt', index_col = lst_index)
+        df = pd.read_sql(query, conn, parse_dates='Dt', index_col = lst_index)
     else:
-        df = pd.read_sql(query, con, parse_dates='Dt')
+        df = pd.read_sql(query, conn, parse_dates='Dt')
     return df
 
 
