@@ -15,6 +15,7 @@ import psycopg2
 from mpl_finance import candlestick_ohlc
 import matplotlib.dates as mdates
 from tradingview_ta import TA_Handler, Interval, Exchange
+from tradernet import NtApi
 
 CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)).replace("\\","/") + '/' + 'DB.config'
 LOG_DIR = os.path.dirname(os.path.realpath(__file__)).replace("\\","/")
@@ -32,8 +33,9 @@ def read_conn_config(filename):
 def get_conn_to_pg():
     config_dict = read_conn_config(CONFIG_FILE)
     return psycopg2.connect(
-       database=config_dict['database'], user=config_dict['user'], password=os.environ['PG_PWD'], host=config_dict['host'], port=config_dict['port']
+        database=config_dict['database'], user=config_dict['user'], password=config_dict['pwd'], host=config_dict['host'], port=config_dict['port']
     )
+# database=config_dict['database'], user=config_dict['user'], password=os.environ['PG_PWD'], host=config_dict['host'], port=config_dict['port']
 
 
 def save_stock_quote_to_db(stock, screener, date_from, date_to):
@@ -216,6 +218,29 @@ def get_stock_quote_from_db(stock, screener, is_dt_index=1, is_stock_index=0, da
         df = pd.read_sql(query, conn, parse_dates='Dt', index_col = lst_index)
     else:
         df = pd.read_sql(query, conn, parse_dates='Dt')
+    return df
+
+
+
+def get_recomendation_from_db():
+    """
+    Returns qultes from DB
+    """
+
+    conn = get_conn_to_pg()
+
+    query = "select * from finance.v_get_rec"
+    df = pd.read_sql(query, conn)
+    return df
+
+
+def get_freedom_open_position():
+    pub_ = os.environ['FREEDOM_PUBLIC_KEY']
+    sec_ = os.environ['FREEDOM_SECRET_KEY']
+
+    res = NtApi(pub_, sec_, NtApi.V2)
+    json_position = res.sendRequest('getPositionJson')
+    df = pd.DataFrame(json_position['result']['ps']['pos'])
     return df
 
 
@@ -483,6 +508,16 @@ def is_normal(r, level=0.01):
     else:
         statistic, p_value = scipy.stats.jarque_bera(r)
         return p_value > level
+
+
+def get_pos_and_rec():
+    df_pos = get_freedom_open_position()
+    df_pos['stock'] = df_pos['i'].apply(lambda x: x.split('.')[0])
+    df_rec = get_recomendation_from_db()
+    df = pd.merge(df_pos, df_rec,  how='left', left_on=['stock'], right_on=['stock'])
+    df = df.rename(columns={'s': 'balance_value', 'q': 'count', 'price_a': 'in_price'})
+    columns_show = ['stock', 'name', 'count', 'in_price', 'balance_value', 'mkt_price', 'profit_price', 'profit_close', 'market_value', 'rec_1d', 'rec_1w','rec_1m']
+    return df[columns_show]
 
 
 def main():
