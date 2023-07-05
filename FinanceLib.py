@@ -285,7 +285,7 @@ def get_stock_list_from_db(market=None):
     """
 
     conn = get_conn_to_pg()
-    market_str = f"'{market}'" if market else'NULL'
+    market_str = f"'{market}'" if market else 'NULL'
     query = f"select * from finance.f_get_stock_list({market_str})"
     df = pd.read_sql(query, conn)
     return df
@@ -562,26 +562,48 @@ def execute_values(conn, df, table):
     cursor.close()
 
 
-def load_stock_history_to_db(dt_from, dt_to, sleep_time=2):
+def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, sleep_time=2):
     stock_df = get_stock_list_from_db()
     conn = get_conn_to_pg()
+    df = pd.DataFrame()
     for ind, row in stock_df.iterrows():
-        stock = row.values[0]
-        screener = row.values[7]
-        if screener == 'america':
+        try:
+            stock = row.values[0]
+            screener = row.values[7]
+            is_load = 0 if check_is_load == 0 else row.values[6]
             print(stock)
-            data = yf.download(stock, dt_from, dt_to)
-            data["Stock"] = stock
-            df = data.reset_index()
-            df = df.rename(columns={"Adj Close": "AdjClose",
-                                    "Date": "dt",
-                                    "Open": "OpenValue",
-                                    "Close": "CloseValue",
-                                    "High": "HighValue",
-                                    "Low": "LowValue"
-                                    })
-            execute_values(conn, df, 'finance.quotes')
-            time.sleep(sleep_time)
+            if is_load == 0 and (stock_input is None or (stock_input and stock == stock_input)):
+                if screener == 'america':
+                    data = yf.download(stock, dt_from, dt_to)
+                    df = data.reset_index()
+                    df = df.rename(columns={"Adj Close": "AdjClose",
+                                            "Date": "dt",
+                                            "Open": "OpenValue",
+                                            "Close": "CloseValue",
+                                            "High": "HighValue",
+                                            "Low": "LowValue"
+                                            })
+                    tbl = 'finance.quotes'
+
+                if screener == 'Forex':
+                    data = yf.Ticker(f"{stock}=x")
+                    data = data.history(period="2Y", interval="1h")
+                    df = data.reset_index()
+                    df = df.rename(columns={
+                        "Datetime": "dt",
+                        "Open": "OpenValue",
+                        "Close": "CloseValue",
+                        "High": "HighValue",
+                        "Low": "LowValue"
+                    })
+                    df["AdjClose"] = df["CloseValue"]
+                    tbl = 'finance.forex'
+                df["Stock"] = stock
+                columns = ["Stock", "dt", "OpenValue", "CloseValue", "HighValue", "LowValue", "AdjClose"]
+                execute_values(conn, df[columns], tbl)
+                time.sleep(sleep_time)
+        except Exception as e:
+            print(f"Error in loading {stock}: ", e)
     conn.close()
 
 
