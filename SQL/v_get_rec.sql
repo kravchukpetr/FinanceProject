@@ -77,4 +77,4 @@ left join actual_price ap on rec_1d.stock = ap.stock
 where s.is_avaible_for_trade = 1
 )
 select *
-from result_rec
+from result_rec;

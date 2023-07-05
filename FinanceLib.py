@@ -12,7 +12,7 @@ import requests
 import bs4 as bs
 import pickle
 import psycopg2
-from mpl_finance import candlestick_ohlc
+# from mpl_finance import candlestick_ohlc
 import matplotlib.dates as mdates
 from tradingview_ta import TA_Handler, Interval
 from tradernet import NtApi
@@ -370,26 +370,26 @@ def write_log(type_write, wf_id, wf_status, cnt_error, error_msg, logger):
         logger.error('Error in Write Log: ' + str(e)) 
 
 
-def get_candle_plot(df_input, stock, re_sample='10D'):
-    """
-    return CandlePlot
-    """
-    
-    df = df_input[df_input['Stock'] == stock]
-    df_ohlc = df['AdjClose'].resample(re_sample).ohlc()
-    df_volume = df['Volume'].resample(re_sample).sum()
-    df_ohlc.reset_index(inplace=True)
-    df_ohlc['Dt'] = df_ohlc['Dt'].map(mdates.date2num)
-
-    fig = plt.figure(figsize=(12, 7))
-    print(fig)
-    ax1 = plt.subplot2grid((6, 1), (0, 0), rowspan=5, colspan=1)
-    ax2 = plt.subplot2grid((6, 1), (5, 0), rowspan=1, colspan=1, sharex=ax1)
-    ax1.xaxis_date()
-
-    candlestick_ohlc(ax1, df_ohlc.values, width=5, colorup='g')
-    ax2.fill_between(df_volume.index.map(mdates.date2num), df_volume.values, 0)
-    plt.show()
+# def get_candle_plot(df_input, stock, re_sample='10D'):
+#     """
+#     return CandlePlot
+#     """
+#
+#     df = df_input[df_input['Stock'] == stock]
+#     df_ohlc = df['AdjClose'].resample(re_sample).ohlc()
+#     df_volume = df['Volume'].resample(re_sample).sum()
+#     df_ohlc.reset_index(inplace=True)
+#     df_ohlc['Dt'] = df_ohlc['Dt'].map(mdates.date2num)
+#
+#     fig = plt.figure(figsize=(12, 7))
+#     print(fig)
+#     ax1 = plt.subplot2grid((6, 1), (0, 0), rowspan=5, colspan=1)
+#     ax2 = plt.subplot2grid((6, 1), (5, 0), rowspan=1, colspan=1, sharex=ax1)
+#     ax1.xaxis_date()
+#
+#     candlestick_ohlc(ax1, df_ohlc.values, width=5, colorup='g')
+#     ax2.fill_between(df_volume.index.map(mdates.date2num), df_volume.values, 0)
+#     plt.show()
 
 
 def get_ma_plot(df_input, stock, window_value=100, min_per_value=0):
