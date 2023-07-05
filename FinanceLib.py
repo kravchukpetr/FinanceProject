@@ -7,18 +7,19 @@ import os
 from datetime import date
 import logging
 import numpy as np
-import scipy.stats
+from scipy.stats import jarque_bera
 import requests
 import bs4 as bs
 import pickle
 import psycopg2
 from mpl_finance import candlestick_ohlc
 import matplotlib.dates as mdates
-from tradingview_ta import TA_Handler, Interval, Exchange
+from tradingview_ta import TA_Handler, Interval
 from tradernet import NtApi
+import psycopg2.extras as extras
 
-CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)).replace("\\","/") + '/' + 'DB.config'
-LOG_DIR = os.path.dirname(os.path.realpath(__file__)).replace("\\","/")
+CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + '/' + 'DB.config'
+LOG_DIR = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
 
 
 def read_conn_config(filename):
@@ -39,6 +40,8 @@ def get_conn_to_pg():
 
 
 def save_stock_quote_to_db(stock, screener, date_from, date_to):
+    query = ""
+    result = 0
     if screener == 'Forex':
         try:
             data = yf.Ticker(f"{stock}=x")
@@ -51,14 +54,14 @@ def save_stock_quote_to_db(stock, screener, date_from, date_to):
         cursor = conn.cursor()
         try:
             for row in df_to_lst:
-                date = row[0].strftime('%Y-%m-%d %H:%M:%S')
-                open = row[1]
-                high = row[2]
-                low = row[3]
-                close = row[4]
-                adj_close = row[4]
+                dt = row[0].strftime('%Y-%m-%d %H:%M:%S')
+                open_value = row[1]
+                high_value = row[2]
+                low_value = row[3]
+                close_value = row[4]
+                adj_close_value = row[4]
                 volume = row[5]
-                query = f"CALL finance.p_load_forex('{date}', '{stock}', {open}, {high}, {low}, {close}, {adj_close}, {volume})"
+                query = f"CALL finance.p_load_forex('{dt}', '{stock}', {open_value}, {high_value}, {low_value}, {close_value}, {adj_close_value}, {volume})"
                 print(query)
                 cursor.execute(query)
             conn.commit()
@@ -80,18 +83,17 @@ def save_stock_quote_to_db(stock, screener, date_from, date_to):
         cursor = conn.cursor()
         try:
             for row in df_to_lst:
-                date = row[0]
-                open = row[1]
-                high = row[2]
-                low = row[3]
-                close = row[4]
-                adj_close = row[5]
+                dt = row[0]
+                open_value = row[1]
+                high_value = row[2]
+                low_value = row[3]
+                close_value = row[4]
+                adj_close_value = row[5]
                 volume = row[6]
-                query = f"CALL finance.p_load_quote('{date}', '{stock}', {open}, {high}, {low}, {close}, {adj_close}, {volume})"
+                query = f"CALL finance.p_load_quote('{dt}', '{stock}', {open_value}, {high_value}, {low_value}, {close_value}, {adj_close_value}, {volume})"
                 cursor.execute(query)
             conn.commit()
             conn.close()
-            result = 0
         except Exception as e:
             print(stock + 'Error in save data to database: ' + str(e))
             result = 1
@@ -125,6 +127,7 @@ def save_stock_recomendation_to_db(stock, screener, exchange):
     Save tradingview recomendation by stock to db
     """
     conn = get_conn_to_pg()
+    query = ""
     try:
         df = get_df_recomendation(stock, screener, exchange)
         df_to_lst = df.reset_index().values.tolist()
@@ -158,6 +161,8 @@ def get_all_stock_recomendation(sleep_time=2, is_debug=0):
     """
     today_dt = date.today().strftime('%Y%m%d')
     log_dir = LOG_DIR + '/logs/' + today_dt
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
     logging.basicConfig(filename=log_dir + '/app.log', filemode='a+', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
     logger = logging.getLogger()
     logger.info('DailyUpdaterecomendation')
@@ -266,7 +271,7 @@ def save_sp500_tickers():
         security = ticker[1]
         sector = ticker[2]
         sub_industry = ticker[3]
-        query = ("CALL finance.p_load_stock_list('" + str(stock) + "', '" + str(security) + "' , '" + str(sector) + "', '" + str(sub_industry) + "');")
+        query = f"CALL finance.p_load_stock_list('{stock}', '{security}' , '{sector}', '{sub_industry}');"
         print(query)
         cursor.execute(query)
     conn.commit()
@@ -286,7 +291,7 @@ def get_stock_list_from_db(market=None):
     return df
 
 
-def get_all_stock_by_period(dt_from, dt_to, logger, sleep_time = 5, is_debug = 0):
+def get_all_stock_by_period(dt_from, dt_to, logger, sleep_time=5, is_debug=0):
     """
     Get quotes for all stocks by time period from dt_from to dt_to
     """
@@ -339,7 +344,12 @@ def daily_update_quote(dt_from=None, sleep_time=5, is_debug=0):
     logger.info('log_dir: ' + log_dir)
     
     write_log(1, 1, 1, 0, 'NULL', logger)
-    result_dict = get_all_stock_by_period(dt_from.strftime('%Y-%m-%d'), dt_to.strftime('%Y-%m-%d'), logger, sleep_time, is_debug)
+    result_dict = get_all_stock_by_period(dt_from.strftime('%Y-%m-%d'),
+                                          dt_to.strftime('%Y-%m-%d'),
+                                          logger,
+                                          sleep_time,
+                                          is_debug
+                                          )
     
     write_log(2, 1, result_dict['State'], result_dict['CntError'], ', '.join(result_dict['lst_error']), logger)
 
@@ -360,7 +370,7 @@ def write_log(type_write, wf_id, wf_status, cnt_error, error_msg, logger):
         logger.error('Error in Write Log: ' + str(e)) 
 
 
-def get_candle_plot(df_input, stock, re_sample = '10D'):
+def get_candle_plot(df_input, stock, re_sample='10D'):
     """
     return CandlePlot
     """
@@ -372,6 +382,7 @@ def get_candle_plot(df_input, stock, re_sample = '10D'):
     df_ohlc['Dt'] = df_ohlc['Dt'].map(mdates.date2num)
 
     fig = plt.figure(figsize=(12, 7))
+    print(fig)
     ax1 = plt.subplot2grid((6, 1), (0, 0), rowspan=5, colspan=1)
     ax2 = plt.subplot2grid((6, 1), (5, 0), rowspan=1, colspan=1, sharex=ax1)
     ax1.xaxis_date()
@@ -381,14 +392,13 @@ def get_candle_plot(df_input, stock, re_sample = '10D'):
     plt.show()
 
 
-def get_ma_plot(df_input, Stock, WindowValue=100, MinPerValue = 0):
+def get_ma_plot(df_input, stock, window_value=100, min_per_value=0):
     
-    df = df_input[df_input['Stock'] == Stock]
-    df['ma'] = df['AdjClose'].rolling(window=WindowValue,min_periods=MinPerValue).mean()
+    df = df_input[df_input['Stock'] == stock]
+    df['ma'] = df['AdjClose'].rolling(window=window_value, min_periods=min_per_value).mean()
 
-    fig = plt.figure(figsize=(12, 7))
-    ax1 = plt.subplot2grid((6,1), (0,0), rowspan=5, colspan=1)
-    ax2 = plt.subplot2grid((6,1), (5,0), rowspan=1, colspan=1, sharex=ax1)
+    ax1 = plt.subplot2grid((6, 1), (0, 0), rowspan=5, colspan=1)
+    ax2 = plt.subplot2grid((6, 1), (5, 0), rowspan=1, colspan=1, sharex=ax1)
     ax1.xaxis_date()
     
     ax1.plot(df.index, df['AdjClose'])
@@ -401,7 +411,7 @@ def get_ma_plot(df_input, Stock, WindowValue=100, MinPerValue = 0):
 def get_adj_close_in_col(tickers_list, df):
     data = pd.DataFrame(columns=tickers_list)
     for ticker in tickers_list:
-        data[ticker] = df[df['Stock']==ticker]['AdjClose']
+        data[ticker] = df[df['Stock'] == ticker]['AdjClose']
     return data
 
 
@@ -506,7 +516,7 @@ def is_normal(r, level=0.01):
     if isinstance(r, pd.DataFrame):
         return r.aggregate(is_normal)
     else:
-        statistic, p_value = scipy.stats.jarque_bera(r)
+        statistic, p_value = jarque_bera(r)
         return p_value > level
 
 
@@ -516,8 +526,63 @@ def get_pos_and_rec():
     df_rec = get_recomendation_from_db()
     df = pd.merge(df_pos, df_rec,  how='left', left_on=['stock'], right_on=['stock'])
     df = df.rename(columns={'s': 'balance_value', 'q': 'count', 'price_a': 'in_price'})
-    columns_show = ['stock', 'name', 'count', 'in_price', 'balance_value', 'mkt_price', 'profit_price', 'profit_close', 'market_value', 'rec_1d', 'rec_1w','rec_1m']
+    columns_show = ['stock',
+                    'name',
+                    'count',
+                    'in_price',
+                    'balance_value',
+                    'mkt_price',
+                    'profit_price',
+                    'profit_close',
+                    'market_value',
+                    'rec_1d',
+                    'rec_1w',
+                    'rec_1m',
+                    ]
     return df[columns_show]
+
+
+def execute_values(conn, df, table):
+    tuples = [tuple(x) for x in df.to_numpy()]
+
+    cols = ','.join(list(df.columns))
+
+    # SQL query to execute
+    query = "INSERT INTO %s(%s) VALUES %%s" % (table, cols)
+    cursor = conn.cursor()
+    try:
+        extras.execute_values(cursor, query, tuples)
+        conn.commit()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print("Error: %s" % error)
+        conn.rollback()
+        cursor.close()
+        return 1
+    print("execute_values() done")
+    cursor.close()
+
+
+def load_stock_history_to_db(dt_from, dt_to, sleep_time=2):
+    stock_df = get_stock_list_from_db()
+    conn = get_conn_to_pg()
+    for ind, row in stock_df.iterrows():
+        stock = row.values[0]
+        screener = row.values[7]
+        if screener == 'america':
+            print(stock)
+            data = yf.download(stock, dt_from, dt_to)
+            data["Stock"] = stock
+            df = data.reset_index()
+            df = df.rename(columns={"Adj Close": "AdjClose",
+                                    "Date": "dt",
+                                    "Open": "OpenValue",
+                                    "Close": "CloseValue",
+                                    "High": "HighValue",
+                                    "Low": "LowValue"
+                                    })
+            execute_values(conn, df, 'finance.quotes')
+            time.sleep(sleep_time)
+    conn.close()
 
 
 def main():
