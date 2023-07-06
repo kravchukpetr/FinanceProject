@@ -1,10 +1,10 @@
 import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt
-import datetime
+# import datetime
 import time
 import os
-from datetime import date
+from datetime import date, datetime, timedelta
 import logging
 import numpy as np
 from scipy.stats import jarque_bera
@@ -198,7 +198,7 @@ def get_all_stock_recomendation(sleep_time=2, is_debug=0):
     return result_dic
 
 
-def get_stock_quote_from_db(stock, screener, is_dt_index=1, is_stock_index=0, date_from=None, date_to=None):
+def get_stock_quote_from_db(stock, screener, date_from=None, date_to=None, is_dt_index=1, is_stock_index=0):
     """
     Returns qultes from DB
     """
@@ -333,7 +333,7 @@ def daily_update_quote(dt_from=None, sleep_time=5, is_debug=0):
 
     dt_to = date.today()
     if not dt_from:
-        dt_from = date.today() + datetime.timedelta(days=-3)
+        dt_from = date.today() + timedelta(days=-3)
 
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
@@ -416,14 +416,20 @@ def get_adj_close_in_col(tickers_list, df):
 
 
 def get_pct_change(df):
-    df_change = df.drop(['OpenValue', 'HighValue', 'LowValue', 'CloseValue', 'Volume', 'LoadDt'], axis=1)
-    
-    df_change['Change'] = df_change.groupby('Stock').AdjClose.pct_change()
-    df_change['Change7'] = df_change.groupby('Stock').AdjClose.pct_change(7)
-    df_change['Change30'] = df_change.groupby('Stock').AdjClose.pct_change(30)
-    df_change['Change90'] = df_change.groupby('Stock').AdjClose.pct_change(90)
-    df_change['Change180'] = df_change.groupby('Stock').AdjClose.pct_change(180)
-    df_change['Change360'] = df_change.groupby('Stock').AdjClose.pct_change(360)
+    # df_change = df.drop(['OpenValue', 'HighValue', 'LowValue', 'CloseValue', 'Volume', 'LoadDt'], axis=1)
+    df_change = df
+    df_change['change'] = df_change.groupby('stock').adjclose.pct_change()
+    df_change['change7'] = df_change.groupby('stock').adjclose.pct_change(7)
+    df_change['change30'] = df_change.groupby('stock').adjclose.pct_change(30)
+    df_change['change90'] = df_change.groupby('stock').adjclose.pct_change(90)
+    df_change['change180'] = df_change.groupby('stock').adjclose.pct_change(180)
+    df_change['change360'] = df_change.groupby('stock').adjclose.pct_change(360)
+    df_change['change'] = df['change'].round(2)
+    df_change['change7'] = df['change7'].round(2)
+    df_change['change30'] = df['change30'].round(2)
+    df_change['change90'] = df['change90'].round(2)
+    df_change['change180'] = df['change180'].round(2)
+    df_change['change360'] = df['change360'].round(2)
     return df_change
 
 
@@ -520,12 +526,26 @@ def is_normal(r, level=0.01):
         return p_value > level
 
 
+def get_df_actual_price_and_metrics(screener="america"):
+    dt_from = datetime.today() - timedelta(days=365)
+    dt_to = datetime.today() - timedelta(days=1)
+    print(screener, dt_from.strftime("%Y-%m-%d"), dt_to.strftime("%Y-%m-%d"))
+    df_actual_price = get_stock_quote_from_db(None, screener, dt_from.strftime("%Y-%m-%d"), dt_to.strftime("%Y-%m-%d"), is_dt_index=0, is_stock_index=0)
+    df_actual_price = get_pct_change(df_actual_price)
+    df_actual_price['rsi'] = df_actual_price.ta.rsi()
+    df_actual_price = df_actual_price[df_actual_price['dt'] == dt_to.strftime("%Y-%m-%d")]
+    return df_actual_price
+
+
 def get_pos_and_rec():
     df_pos = get_freedom_open_position()
     df_pos['stock'] = df_pos['i'].apply(lambda x: x.split('.')[0])
     df_rec = get_recomendation_from_db()
     df = pd.merge(df_pos, df_rec,  how='left', left_on=['stock'], right_on=['stock'])
     df = df.rename(columns={'s': 'balance_value', 'q': 'count', 'price_a': 'in_price'})
+    df_actual = get_df_actual_price_and_metrics("america")
+    df_result = pd.merge(df, df_actual, how='left', left_on=['stock'], right_on=['stock'])
+
     columns_show = ['stock',
                     'name',
                     'count',
@@ -538,8 +558,15 @@ def get_pos_and_rec():
                     'rec_1d',
                     'rec_1w',
                     'rec_1m',
+                    'rec_loaddt',
+                    'change7',
+                    'change30',
+                    'change90',
+                    'change180',
+                    'change360',
+                    'rsi'
                     ]
-    return df[columns_show]
+    return df_result[columns_show]
 
 
 def execute_values(conn, df, table):
@@ -570,9 +597,9 @@ def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, 
         try:
             stock = row.values[0]
             screener = row.values[7]
-            is_load = 0 if check_is_load == 0 else row.values[6]
-            print(stock)
-            if is_load == 0 and (stock_input is None or (stock_input and stock == stock_input)):
+            is_load = 1 if check_is_load == 0 else row.values[6]
+            if is_load == 1 and (stock_input is None or (stock_input and stock == stock_input)):
+                print(stock)
                 if screener == 'america':
                     data = yf.download(stock, dt_from, dt_to)
                     df = data.reset_index()

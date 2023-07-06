@@ -612,3 +612,8 @@ INSERT INTO finance.stock (stock,"security",sector,subindustry,exchange,screener
 	 ('WAB','Wabtec','Industrials','Construction Machinery & Heavy Transportation Equipment','NYSE','america','2023-06-22 22:08:57.95499',1,1),
 	 ('WMT','Walmart','Consumer Staples','Consumer Staples Merchandise Retail','NYSE','america','2023-06-22 22:08:57.95499',1,1),
 	 ('WM','Waste Management','Industrials','Environmental & Facilities Services','NYSE','america','2023-06-22 22:08:57.95499',1,1);
+
+insert into finance.stock(stock, security, exchange, screener) values('ABCL', 'AbCellera Biologics', 'NASDAQ', 'america');
+insert into finance.stock(stock, security, exchange, screener) values('AMTX', 'AMTX Aemetis Inc', 'NASDAQ', 'america');
+insert into finance.stock(stock, security, exchange, screener) values('DKNG', 'DraftKings Inc', 'NASDAQ', 'america');
+insert into finance.stock(stock, security, exchange, screener) values('PACB', 'Pacific Biosciences of California Inc', 'NASDAQ', 'america');
