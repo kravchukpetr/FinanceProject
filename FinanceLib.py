@@ -17,6 +17,7 @@ import matplotlib.dates as mdates
 from tradingview_ta import TA_Handler, Interval
 from tradernet import NtApi
 import psycopg2.extras as extras
+import pandas_ta
 
 CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + '/' + 'DB.config'
 LOG_DIR = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
@@ -208,9 +209,8 @@ def get_stock_quote_from_db(stock, screener, date_from=None, date_to=None, is_dt
     stock_str = "'" + stock + "'" if stock else "NULL"
     date_from_str = "'" + date_from + "'" if date_from else "NULL"
     date_to_str = "'" + date_to + "'" if date_to else "NULL"
-    screener_str = "'" + screener + "'"
 
-    query = f"select * from finance.f_get_quote ({date_from_str}, {date_to_str}, {stock_str}, {screener_str})"
+    query = f"select * from finance.f_get_quote ({date_from_str}, {date_to_str}, {stock_str}, '{screener}')"
     print(query)
     lst_index = []
     # if Stock.find(',') > 0:
@@ -424,12 +424,12 @@ def get_pct_change(df):
     df_change['change90'] = df_change.groupby('stock').adjclose.pct_change(90)
     df_change['change180'] = df_change.groupby('stock').adjclose.pct_change(180)
     df_change['change360'] = df_change.groupby('stock').adjclose.pct_change(360)
-    df_change['change'] = df['change'].round(2)
-    df_change['change7'] = df['change7'].round(2)
-    df_change['change30'] = df['change30'].round(2)
-    df_change['change90'] = df['change90'].round(2)
-    df_change['change180'] = df['change180'].round(2)
-    df_change['change360'] = df['change360'].round(2)
+    df_change['change'] = df['change'].round(4)
+    df_change['change7'] = df['change7'].round(4)
+    df_change['change30'] = df['change30'].round(4)
+    df_change['change90'] = df['change90'].round(4)
+    df_change['change180'] = df['change180'].round(4)
+    df_change['change360'] = df['change360'].round(4)
     return df_change
 
 
@@ -537,7 +537,20 @@ def get_df_actual_price_and_metrics(screener="america"):
     return df_actual_price
 
 
+def get_rec_and_metric(screener="america"):
+    """
+    Get dataframe with actual recomendation and price on previous day
+    """
+    df_rec = get_recomendation_from_db()
+    df_actual = get_df_actual_price_and_metrics(screener)
+    df_result = pd.merge(df_actual, df_rec, how='left', left_on=['stock'], right_on=['stock'])
+    return df_result
+
+
 def get_pos_and_rec():
+    """
+    Get dataframe with position in freedom, recomendation and price on previous day
+    """
     df_pos = get_freedom_open_position()
     df_pos['stock'] = df_pos['i'].apply(lambda x: x.split('.')[0])
     df_rec = get_recomendation_from_db()
@@ -570,6 +583,9 @@ def get_pos_and_rec():
 
 
 def execute_values(conn, df, table):
+    """
+    Generate SQL scripts and execute it for fast load stock history
+    """
     tuples = [tuple(x) for x in df.to_numpy()]
 
     cols = ','.join(list(df.columns))
@@ -590,6 +606,9 @@ def execute_values(conn, df, table):
 
 
 def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, sleep_time=2):
+    """
+    Fast load stock history in DB
+    """
     stock_df = get_stock_list_from_db()
     conn = get_conn_to_pg()
     df = pd.DataFrame()
