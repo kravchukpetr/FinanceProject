@@ -279,14 +279,14 @@ def save_sp500_tickers():
     return tickers
 
 
-def get_stock_list_from_db(market=None):
+def get_stock_list_from_db(screener=None):
     """
     Get list of quotes from db
     """
 
     conn = get_conn_to_pg()
-    market_str = f"'{market}'" if market else 'NULL'
-    query = f"select * from finance.f_get_stock_list({market_str})"
+    screener_str = f"'{screener}'" if screener else 'NULL'
+    query = f"select * from finance.f_get_stock_list({screener_str})"
     df = pd.read_sql(query, conn)
     return df
 
@@ -605,7 +605,7 @@ def execute_values(conn, df, table):
     cursor.close()
 
 
-def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, sleep_time=2):
+def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, sleep_time=2, screener_input=None):
     """
     Fast load stock history in DB
     """
@@ -619,7 +619,7 @@ def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, 
             is_load = 1 if check_is_load == 0 else row.values[6]
             if is_load == 1 and (stock_input is None or (stock_input and stock == stock_input)):
                 print(stock)
-                if screener == 'america':
+                if screener == 'america' and (screener_input == screener or screener_input is None):
                     data = yf.download(stock, dt_from, dt_to)
                     df = data.reset_index()
                     df = df.rename(columns={"Adj Close": "AdjClose",
@@ -631,7 +631,7 @@ def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, 
                                             })
                     tbl = 'finance.quotes'
 
-                if screener == 'Forex':
+                if screener == 'Forex' and (screener_input == screener or screener_input is None):
                     data = yf.Ticker(f"{stock}=x")
                     data = data.history(period="2Y", interval="1h")
                     df = data.reset_index()
