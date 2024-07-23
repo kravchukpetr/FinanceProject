@@ -592,6 +592,7 @@ def execute_values(conn, df, table):
 
     # SQL query to execute
     query = "INSERT INTO %s(%s) VALUES %%s" % (table, cols)
+    print(query, tuples)
     cursor = conn.cursor()
     try:
         extras.execute_values(cursor, query, tuples)

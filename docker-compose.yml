@@ -3,6 +3,7 @@ services:
   postgres:
     build: ./postgres
     hostname: postgres_airflow
+    container_name: my_postgres
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
