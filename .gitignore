@@ -9,6 +9,7 @@
 .idea
 SQL/.dbeaver/*
 *.ipynb_checkpoints/*
+**/.ipynb_checkpoints/
 */*.ipynb_checkpoints/*
 SQL/.project
 logs/*
