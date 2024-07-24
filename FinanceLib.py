@@ -63,7 +63,7 @@ def save_stock_quote_to_db(stock, screener, date_from, date_to):
                 adj_close_value = row[4]
                 volume = row[5]
                 query = f"CALL finance.p_load_forex('{dt}', '{stock}', {open_value}, {high_value}, {low_value}, {close_value}, {adj_close_value}, {volume})"
-                print(query)
+                # print(query)
                 cursor.execute(query)
             conn.commit()
             conn.close()
@@ -592,7 +592,7 @@ def execute_values(conn, df, table):
 
     # SQL query to execute
     query = "INSERT INTO %s(%s) VALUES %%s" % (table, cols)
-    print(query, tuples)
+    # print(query, tuples)
     cursor = conn.cursor()
     try:
         extras.execute_values(cursor, query, tuples)
