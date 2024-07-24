@@ -628,7 +628,8 @@ def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, 
                                             "Open": "OpenValue",
                                             "Close": "CloseValue",
                                             "High": "HighValue",
-                                            "Low": "LowValue"
+                                            "Low": "LowValue",
+                                            "Volume": "Volume"
                                             })
                     tbl = 'finance.quotes'
 
@@ -646,7 +647,7 @@ def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, 
                     df["AdjClose"] = df["CloseValue"]
                     tbl = 'finance.forex'
                 df["Stock"] = stock
-                columns = ["Stock", "dt", "OpenValue", "CloseValue", "HighValue", "LowValue", "AdjClose"]
+                columns = ["Stock", "dt", "OpenValue", "CloseValue", "HighValue", "LowValue", "AdjClose", "Volume"]
                 execute_values(conn, df[columns], tbl)
                 time.sleep(sleep_time)
         except Exception as e:

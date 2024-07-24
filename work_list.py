@@ -5,22 +5,24 @@ from datetime import datetime
 OPERATION_LIST = [
     "OTHER",
     "LOAD_HISTORY",
-    "LOAD_DAILY"
+    "LOAD_DAILY",
+    "LOAD_CURRENT_STOCK"
 ]
-OPERATION = OPERATION_LIST[2]
+OPERATION = OPERATION_LIST[3]
 
 if __name__ == "__main__":
     print(OPERATION)
     dt_from = "2010-01-01"
     current_date = datetime.now().strftime('%Y-%m-%d')
 
-    # fl.load_stock_history_to_db(dt_from="2010-01-01",
-    #                             dt_to="2024-07-24",
-    #                             stock_input="MSFT",
-    #                             check_is_load=1,
-    #                             sleep_time=1,
-    #                             screener_input="america"
-    #                             )
+    if OPERATION == "LOAD_CURRENT_STOCK":
+        fl.load_stock_history_to_db(dt_from=dt_from,
+                                    dt_to=current_date,
+                                    stock_input="AAPL",
+                                    check_is_load=1,
+                                    sleep_time=1,
+                                    screener_input="america"
+                                    )
     # df = fl.get_stock_quote_from_db("AAPL", "america", "2024-03-12", "2024-03-12")
     # df = fl.get_pct_change(df)
     # print(len(df))
