@@ -1,9 +1,7 @@
-from urllib import request
-
-import airflow.utils.dates
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-import FinanceLib as fl
+from app import FinanceLib as fl
+
 dag = DAG(
     dag_id="Tradingview get recomendations",
     schedule_interval="@hourly",

@@ -1,4 +1,4 @@
-import FinanceLib as fl
+from app import FinanceLib as fl
 from datetime import datetime
 # import pandas_ta
 
@@ -8,7 +8,7 @@ OPERATION_LIST = [
     "LOAD_DAILY",
     "LOAD_CURRENT_STOCK"
 ]
-OPERATION = OPERATION_LIST[3]
+OPERATION = OPERATION_LIST[1]
 
 if __name__ == "__main__":
     print(OPERATION)
@@ -32,8 +32,8 @@ if __name__ == "__main__":
 
     # load history
     if OPERATION == "LOAD_HISTORY":
-        fl.save_sp500_tickers()
-        fl.load_stock_history_to_db(dt_from=dt_from, dt_to=current_date, screener_input="america")
+        # fl.save_sp500_tickers()
+        fl.load_stock_history_to_db(dt_from=dt_from, dt_to=current_date, screener_input="america", check_is_load=1)
 
     #daily load
     if OPERATION == "LOAD_DAILY":

@@ -262,7 +262,7 @@ def save_sp500_tickers():
                   row.findAll('td')[2].text, row.findAll('td')[3].text]
         tickers.append(ticker)
 
-    with open("sp500tickers.pickle", "wb") as f:
+    with open("../sp500tickers.pickle", "wb") as f:
         pickle.dump(tickers,f)
 
     for ticker in tickers:
@@ -602,7 +602,7 @@ def execute_values(conn, df, table):
         conn.rollback()
         cursor.close()
         return 1
-    print("execute_values() done")
+    # print("execute_values() done")
     cursor.close()
 
 
@@ -610,7 +610,7 @@ def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, 
     """
     Fast load stock history in DB
     """
-    stock_df = get_stock_list_from_db()
+    stock_df = get_stock_list_from_db(screener=screener_input)
     conn = get_conn_to_pg()
     df = pd.DataFrame()
     for ind, row in stock_df.iterrows():

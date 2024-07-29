@@ -276,12 +276,15 @@ INSERT INTO finance.recomendation(
 
 end; $$;
 
+
 drop procedure if exists finance.p_load_stock_list;
 CREATE procedure finance.p_load_stock_list(
 v_Stock varchar(10),
 v_Security varchar(300),
 v_Sector varchar(100),
-v_SubIndustry varchar(100)
+v_SubIndustry varchar(100),
+v_Exchange varchar(100) DEFAULT '',
+v_Screener varchar(100) DEFAULT 'america'
 )
 language plpgsql
 as $$
@@ -292,12 +295,16 @@ begin
 		Stock,
 		Security,
 		Sector,
-		SubIndustry
+		SubIndustry,
+		Exchange,
+		Screener
 		)
 		SELECT v_Stock,
 			   v_Security,
 			   v_Sector,
-			   v_SubIndustry;
+			   v_SubIndustry,
+			   v_Exchange,
+			   v_Screener;
 	end if;
 end; $$;
 
