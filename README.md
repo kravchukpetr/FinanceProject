@@ -57,5 +57,14 @@ docker volume rm $(docker volume ls -q)
 docker system prune
 ```
 
+## Backup PG
+### backup
+```bash
+docker exec -t postgres_finance pg_dump -U postgres -d postgres -f /var/lib/postgresql/data/backup_finance.sql
+```
+### coopy backup from container to remote server directory
+```bash
+docker cp postgres_finance:/var/lib/postgresql/data/backup_finance.sql /projects/backup/backup_finance.sql
+```
 ## pgAdmin
 http://89.253.222.32:5050/browser/

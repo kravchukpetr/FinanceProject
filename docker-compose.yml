@@ -26,6 +26,7 @@ services:
 
   app:
     build: ./python
+    container_name: finance_app
     volumes:
       - ./app:/usr/src/app
     environment:

@@ -178,7 +178,7 @@ def get_all_stock_recomendation(sleep_time=2, is_debug=0):
         stock = row.values[0]
         screener = row.values[7]
         exchange = row.values[4]
-        print(stock)
+        print(num_ticker, stock)
         try:
             save_stock_recomendation_to_db(stock, screener, exchange)
             logging.info(row.values[0] + ' Success')
@@ -302,7 +302,7 @@ def get_all_stock_by_period(dt_from, dt_to, logger, sleep_time=5, is_debug=0):
     num_ticker = 0
     for ind, row in stock_df.iterrows():
         try:
-            print(row.values[0])
+            print(num_ticker, row.values[0])
             save_stock_quote_to_db(row.values[0], row.values[7], dt_from, dt_to)
             logging.info(row.values[0] + ' Success')
             time.sleep(sleep_time) 
