@@ -56,6 +56,19 @@ docker volume rm $(docker volume ls -q)
 ```bash
 docker system prune
 ```
+### stop and remove all containers
+```bash
+docker-compose down
+```
+### stop and remove all containers with named volumes
+```bash
+docker-compose down -v
+```
+### stop containers and remove all images
+```bash
+docker-compose down --rmi all
+```
+
 
 ## Backup PG
 ### backup

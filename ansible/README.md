@@ -27,5 +27,9 @@ cd /ansible
 ansible-playbook -i inventory/hosts.ini playbooks/deploy_docker_compose.yml
 ansible-playbook -i inventory/hosts.ini playbooks/deploy_docker_compose.yml --ask-become-pass
 ```
+Backup to crontab
+```bash
+ansible-playbook -i inventory/hosts.ini playbooks/backup_postgres.yml --ask-become-pass
+```
 
 
