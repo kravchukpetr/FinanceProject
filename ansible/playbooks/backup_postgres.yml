@@ -1,0 +1,49 @@
+---
+- name: Schedule PostgreSQL backups with cron
+  hosts: my_remote_server
+  become: true
+  become_method: sudo
+  become_user: ansible
+
+  vars:
+    backup_script: /projects/backup_script/backup_postgres.sh
+    backup_dir: /projects/backup
+    db_user: postgres
+    db_name: postgres
+    container_name: postgres_finance
+    cron_time: "0 2 * * *"  # Daily at 2 AM
+
+  tasks:
+    - name: Ensure backup directory exists
+      file:
+        path: "{{ backup_dir }}"
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: '0755'
+
+    - name: Create backup script
+      copy:
+        dest: "{{ backup_script }}"
+        content: |
+          #!/bin/bash
+          TIMESTAMP=$(date +\%F)
+          BACKUP_FILE="{{ backup_dir }}/backup-$TIMESTAMP.sql"
+          docker exec -t {{ container_name }} pg_dump -U {{ db_user }} -d {{ db_name }} -f /tmp/backup.sql
+          docker cp {{ container_name }}:/tmp/backup.sql $BACKUP_FILE
+          docker exec -t {{ container_name }} rm /tmp/backup.sql
+
+      mode: '0755'
+      owner: root
+      group: root
+
+    - name: Add cron job for PostgreSQL backup
+      cron:
+        name: "PostgreSQL Backup"
+        job: "{{ backup_script }}"
+        user: root
+        minute: "{{ cron_time.split()[0] }}"
+        hour: "{{ cron_time.split()[1] }}"
+        day: "{{ cron_time.split()[2] }}"
+        month: "{{ cron_time.split()[3] }}"
+        weekday: "{{ cron_time.split()[4] }}"

@@ -62,7 +62,7 @@ docker system prune
 ```bash
 docker exec -t postgres_finance pg_dump -U postgres -d postgres -f /var/lib/postgresql/data/backup_finance.sql
 ```
-### coopy backup from container to remote server directory
+### copy backup from container to remote server directory
 ```bash
 docker cp postgres_finance:/var/lib/postgresql/data/backup_finance.sql /projects/backup/backup_finance.sql
 ```
