@@ -26,11 +26,11 @@ docker ps -a
 ```
 ### остановить контейнеры
 ```bash
-docker compose stop
+docker-compose stop
 ```
 ### запустить контейнеры
 ```bash
-docker compose start
+docker-compose start
 ```
 ### зайти в контейнер
 ```bash

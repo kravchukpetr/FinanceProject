@@ -16,4 +16,4 @@ logs/*
 */logs/*
 data/*
 /ansible/.ssh
-my-env
+.env
