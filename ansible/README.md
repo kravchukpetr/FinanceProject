@@ -15,6 +15,30 @@ sudo chown ansible:ansible /home/ansible/.ssh/authorized_keys
 ssh -i ~/.ssh/id_rsa_ansible ansible@your_remote_server_ip
 ```
 
+### Add groups to ansible use
+```bash
+usermod -aG root ansible
+usermod -aG sudo ansible
+usermod -aG docker ansible
+usermod -aG crontab ansible
+```
+
+### Check user groups
+```bash
+groups ansible
+```
+### Modify visudo - exec from root
+```bash
+sudo visudo
+--add
+ansible ALL=(ALL) NOPASSWD: /usr/bin/crontab
+ansible ALL=(root) /usr/bin/crontab, /usr/bin/crontab -u root -e
+```
+
+```bash
+sh -c "echo '127.0.0.1   localhost localhost.localdomain' >> /etc/hosts"
+```
+
 ### Run ansible container
 ```bash
 docker build -t ansible-container .
@@ -24,7 +48,6 @@ docker run -it --name ansible-container -v ./playbooks:/ansible/playbooks -v ./i
 ### In docker container
 ```bash
 cd /ansible
-ansible-playbook -i inventory/hosts.ini playbooks/deploy_docker_compose.yml
 ansible-playbook -i inventory/hosts.ini playbooks/deploy_docker_compose.yml --ask-become-pass
 ```
 Backup to crontab

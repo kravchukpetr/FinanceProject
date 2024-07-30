@@ -2,8 +2,8 @@
 - name: Deploy Docker Compose application
   hosts: my_remote_server
   become: true
-  become_method: sudo  # Optional: specify the method, defaults to sudo
-  become_user: ansible  # Optional: specify the user to run commands as
+#  become_method: sudo  # Optional: specify the method, defaults to sudo
+#  become_user: ansible  # Optional: specify the user to run commands as
 
   tasks:
     - name: Ensure Docker is installed
