@@ -68,6 +68,11 @@ docker-compose down -v
 ```bash
 docker-compose down --rmi all
 ```
+### ensure docker service is running
+```bash
+sudo systemctl status docker
+```
+
 
 
 ## Backup PG

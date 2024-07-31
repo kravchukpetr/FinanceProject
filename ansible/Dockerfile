@@ -18,8 +18,8 @@ COPY ./playbooks /ansible/playbooks
 COPY ./inventory /ansible/inventory
 
 # Copy the SSH private key into the container
-COPY ./.ssh/id_rsa_ansible /root/.ssh/id_rsa
-COPY ./.ssh/id_rsa_ansible.pub /root/.ssh/id_rsa.pub
+COPY ./.ssh/id_rsa_root /root/.ssh/id_rsa
+COPY ./.ssh/id_rsa_root.pub /root/.ssh/id_rsa.pub
 
 # Set permissions for the SSH key
 RUN chmod 600 /root/.ssh/id_rsa && \

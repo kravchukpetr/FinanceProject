@@ -2,8 +2,8 @@
 - name: Schedule PostgreSQL backups with cron
   hosts: my_remote_server
   become: true
-  become_method: sudo
-  become_user: ansible
+#  become_method: sudo
+#  become_user: ansible
 
   vars:
     backup_script: /projects/backup_script/backup_postgres.sh
@@ -32,12 +32,12 @@
           docker exec -t {{ container_name }} pg_dump -U {{ db_user }} -d {{ db_name }} -f /tmp/backup.sql
           docker cp {{ container_name }}:/tmp/backup.sql $BACKUP_FILE
           docker exec -t {{ container_name }} rm /tmp/backup.sql
+          find "$BACKUP_DIR" -name "backup-*.sql" -type f -mtime +7 | sort | head -n -1 | xargs -r rm
         mode: '0755'
 
     - name: Add cron job for PostgreSQL backup
       cron:
         name: "PostgreSQL Backup"
-        user: root
         job: "{{ backup_script }}"
         minute: "{{ cron_time.split()[0] }}"
         hour: "{{ cron_time.split()[1] }}"
