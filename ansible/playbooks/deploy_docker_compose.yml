@@ -33,4 +33,4 @@
     - name: Start Docker Compose services
       command: /usr/local/bin/docker-compose up -d
       args:
-        chdir: /projects/FinanceProject
+        chdir: "{{ project_dir }}"
