@@ -7,7 +7,8 @@ OPERATION_LIST = {
     1: "LOAD_HISTORY",
     2: "LOAD_DAILY",
     3: "LOAD_CURRENT_STOCK",
-    4: "LOGS_FOLDER_RM"
+    4: "LOGS_FOLDER_RM",
+    5: "DEFINE_EXCHANGE_FOR_STOCK"
 }
 OPERATION = OPERATION_LIST[4]
 
@@ -36,10 +37,15 @@ if __name__ == "__main__":
         # fl.save_sp500_tickers()
         fl.load_stock_history_to_db(dt_from=dt_from, dt_to=current_date, screener_input="america", check_is_load=1)
 
-    #daily load
+    # daily load
     if OPERATION == "LOAD_DAILY":
         fl.daily_update_quote()
         fl.get_all_stock_recomendation()
-
+    # check function for remove old logs directories
     if OPERATION == "LOGS_FOLDER_RM":
         mntl.rm_old_logs()
+    # check function to define exchange for stock symbols
+    if OPERATION == "DEFINE_EXCHANGE_FOR_STOCK":
+        screener = "america"
+        stock = fl.get_exchange_for_stock(screener)
+        print(stock)

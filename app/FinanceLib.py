@@ -19,6 +19,7 @@ from tradernet import NtApi
 import psycopg2.extras as extras
 import pandas_ta
 import shutil
+from Common import EXCHANGE_LIST
 
 CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + '/' + 'DB.config'
 LOG_DIR = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
@@ -655,6 +656,32 @@ def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, 
             print(f"Error in loading {stock}: ", e)
     conn.close()
 
+
+def get_exchange_for_stock(screener):
+    """
+    Define Exchange for each stock symbol by screener
+    """
+    df = get_stock_list_from_db(screener)
+    stocks = {key: [] for key in EXCHANGE_LIST}
+    for symbol in df['stock']:
+        is_define = 0
+        for exchange in EXCHANGE_LIST:
+            if is_define == 0:
+                try:
+                    handler = TA_Handler(
+                        symbol=symbol,
+                        screener="america" if exchange not in ["BINANCE", "COINBASE"] else "crypto",
+                        exchange=exchange,
+                        interval=Interval.INTERVAL_1_DAY
+                    )
+                    analysis = handler.get_analysis()
+                    stocks[exchange].append(symbol)
+                    is_define = 1
+                except Exception as e:
+                    pass
+            else:
+                break
+    return stocks
 
 def main():
     save_sp500_tickers()
