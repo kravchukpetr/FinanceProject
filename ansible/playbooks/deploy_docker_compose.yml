@@ -5,6 +5,9 @@
 #  become_method: sudo  # Optional: specify the method, defaults to sudo
 #  become_user: ansible  # Optional: specify the user to run commands as
 
+  vars:
+    project_dir: /projects/FinanceProject
+
   tasks:
     - name: Ensure Docker is installed
       apt:
@@ -19,11 +22,13 @@
         mode: '0755'
       when: ansible_os_family == 'Debian'
 
-#    - name: Clone project repository
-#      git:
-#        repo: 'https://your-repo-url.git'
-#        dest: /path/to/project
-#        version: main
+    - name: Clone project repository
+      git:
+        repo: 'https://github.com/kravchukpetr/FinanceProject.git'
+        dest: "{{ project_dir }}"
+        version: main
+        update: yes
+        force: yes
 
     - name: Start Docker Compose services
       command: /usr/local/bin/docker-compose up -d
