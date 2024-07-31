@@ -1,14 +1,15 @@
 from app import FinanceLib as fl
+from app import MaintenanceLib as mntl
 from datetime import datetime
-# import pandas_ta
 
-OPERATION_LIST = [
-    "OTHER",
-    "LOAD_HISTORY",
-    "LOAD_DAILY",
-    "LOAD_CURRENT_STOCK"
-]
-OPERATION = OPERATION_LIST[1]
+OPERATION_LIST = {
+    0: "OTHER",
+    1: "LOAD_HISTORY",
+    2: "LOAD_DAILY",
+    3: "LOAD_CURRENT_STOCK",
+    4: "LOGS_FOLDER_RM"
+}
+OPERATION = OPERATION_LIST[4]
 
 if __name__ == "__main__":
     print(OPERATION)
@@ -39,3 +40,6 @@ if __name__ == "__main__":
     if OPERATION == "LOAD_DAILY":
         fl.daily_update_quote()
         fl.get_all_stock_recomendation()
+
+    if OPERATION == "LOGS_FOLDER_RM":
+        mntl.rm_old_logs()

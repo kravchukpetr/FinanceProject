@@ -12,7 +12,7 @@ SQL/.dbeaver/*
 **/.ipynb_checkpoints/
 */*.ipynb_checkpoints/*
 SQL/.project
-logs/*
+app/logs/*
 */logs/*
 data/*
 /ansible/.ssh

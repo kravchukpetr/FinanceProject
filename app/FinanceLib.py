@@ -18,6 +18,7 @@ from tradingview_ta import TA_Handler, Interval
 from tradernet import NtApi
 import psycopg2.extras as extras
 import pandas_ta
+import shutil
 
 CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + '/' + 'DB.config'
 LOG_DIR = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
