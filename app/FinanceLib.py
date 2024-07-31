@@ -19,8 +19,13 @@ from tradernet import NtApi
 import psycopg2.extras as extras
 import pandas_ta
 import shutil
-from Common import EXCHANGE_LIST
+from app.Common import EXCHANGE_LIST
+from dotenv import load_dotenv
+from sqlalchemy import create_engine, Table, MetaData
+from sqlalchemy.dialects.postgresql import insert
 
+
+load_dotenv()
 CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + '/' + 'DB.config'
 LOG_DIR = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
 
@@ -35,11 +40,21 @@ def read_conn_config(filename):
 
 
 def get_conn_to_pg():
-    config_dict = read_conn_config(CONFIG_FILE)
+    # config_dict = read_conn_config(CONFIG_FILE)
     return psycopg2.connect(
-        database=config_dict['database'], user=config_dict['user'], password=config_dict['pwd'], host=config_dict['host'], port=config_dict['port']
+        # database=config_dict['database'], user=config_dict['user'], password=config_dict['pwd'], host=config_dict['host'], port=config_dict['port']
+        database=os.environ['PG_DB'],
+        user=os.environ['PG_USR'],
+        password=os.environ['PG_PWD'],
+        host=os.environ['PG_HOST'],
+        port=os.environ['PG_PORT']
     )
-# database=config_dict['database'], user=config_dict['user'], password=os.environ['PG_PWD'], host=config_dict['host'], port=config_dict['port']
+
+
+def get_conn_pg_engine(echo=True):
+    db_url = f"postgresql://{os.environ['PG_USR']}:{os.environ['PG_PWD']}@{os.environ['PG_HOST']}:{os.environ['PG_PORT']}/{os.environ['PG_DB']}"
+    engine = create_engine(db_url, echo=echo)
+    return engine
 
 
 def save_stock_quote_to_db(stock, screener, date_from, date_to):
@@ -682,6 +697,59 @@ def get_exchange_for_stock(screener):
             else:
                 break
     return stocks
+
+
+def finance_stat_rename_columns(df_type, df):
+    if df_type == 'income':
+        df = df.rename(columns={
+            'Ticker': 'ticker',
+            'SimFinId': 'simfin_id',
+            'Currency': 'currency',
+            'Fiscal Year': 'fiscal_year',
+            'Fiscal Period': 'fiscal_period',
+            'Publish Date': 'publish_date',
+            'Restated Date': 'restated_date',
+            'Shares (Basic)': 'shares_basic',
+            'Shares (Diluted)': 'shares_diluted',
+            'Revenue': 'revenue',
+            'Cost of Revenue': 'cost_of_revenue',
+            'Gross Profit': 'gross_profit',
+            'Operating Expenses': 'operating_expenses',
+            'Selling, General & Administrative': 'selling_general_administrative',
+            'Research & Development': 'research_development',
+            'Depreciation & Amortization': 'depreciation_amortization',
+            'Operating Income (Loss)': 'operating_income',
+            'Non-Operating Income (Loss)': 'non_operating_income',
+            'Interest Expense, Net': 'interest_expense_net',
+            'Pretax Income (Loss), Adj.': 'pretax_income_adj',
+            'Abnormal Gains (Losses)': 'abnormal_gains',
+            'Pretax Income (Loss)': 'pretax_income',
+            'Income Tax (Expense) Benefit, Net': 'income_tax_benefit_net',
+            'Income (Loss) from Continuing Operations': 'income_from_continuing_operations',
+            'Net Extraordinary Gains (Losses)': 'net_extraordinary_gains',
+            'Net Income': 'net_income',
+            'Net Income (Common)': 'net_income_common'
+        })
+        df.rename_axis('report_date', inplace=True)
+    return df
+
+
+def merge_df_to_pg(df, engine, table_name, schema_name, merge_key):
+    metadata = MetaData()
+    table = Table(table_name, metadata, autoload_with=engine, schema=schema_name)
+
+    # Define the insert statement
+    insert_stmt = insert(table).values(df.to_dict(orient='records'))
+
+    # Define the update statement for the ON CONFLICT clause
+    update_stmt = insert_stmt.on_conflict_do_update(
+        index_elements=merge_key,  # Specify the unique constraint or index for conflict
+        set_={c.key: c for c in insert_stmt.excluded if c.key not in merge_key}
+    )
+
+    # Execute the upsert
+    with engine.connect() as conn:
+        conn.execute(update_stmt)
 
 def main():
     save_sp500_tickers()
