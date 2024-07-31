@@ -26,7 +26,7 @@
       git:
         repo: 'https://github.com/kravchukpetr/FinanceProject.git'
         dest: "{{ project_dir }}"
-        version: main
+        version: 'master'
         update: yes
         force: yes
 
