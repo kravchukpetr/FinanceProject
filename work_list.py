@@ -1,6 +1,10 @@
 from app import FinanceLib as fl
 from app import MaintenanceLib as mntl
 from datetime import datetime
+from app import Simfin as sf
+
+import warnings
+warnings.filterwarnings('ignore')
 
 OPERATION_LIST = {
     0: "OTHER",
@@ -8,7 +12,8 @@ OPERATION_LIST = {
     2: "LOAD_DAILY",
     3: "LOAD_CURRENT_STOCK",
     4: "LOGS_FOLDER_RM",
-    5: "DEFINE_EXCHANGE_FOR_STOCK"
+    5: "DEFINE_EXCHANGE_FOR_STOCK",
+    6: "LOAD_SIMFIN"
 }
 OPERATION = OPERATION_LIST[4]
 
@@ -49,3 +54,6 @@ if __name__ == "__main__":
         screener = "america"
         stock = fl.get_exchange_for_stock(screener)
         print(stock)
+    if OPERATION == "LOAD_SIMFIN":
+        sf.load_simfin()
+

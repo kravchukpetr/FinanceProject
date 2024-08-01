@@ -32,7 +32,7 @@
           docker exec -t {{ container_name }} pg_dump -U {{ db_user }} -d {{ db_name }} -f /tmp/backup.sql
           docker cp {{ container_name }}:/tmp/backup.sql $BACKUP_FILE
           docker exec -t {{ container_name }} rm /tmp/backup.sql
-          find "$BACKUP_DIR" -name "backup-*.sql" -type f -mtime +7 | sort | head -n -1 | xargs -r rm
+          find "{{ backup_dir }}" -name "backup-*.sql" -type f -mtime +7 | sort | head -n -1 | xargs -r rm
         mode: '0755'
 
     - name: Add cron job for PostgreSQL backup
