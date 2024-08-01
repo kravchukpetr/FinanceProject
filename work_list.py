@@ -1,7 +1,7 @@
 from app import FinanceLib as fl
 from app import MaintenanceLib as mntl
 from datetime import datetime
-from app import Simfin as sf
+from app import SimfinLib as sf
 
 import warnings
 warnings.filterwarnings('ignore')

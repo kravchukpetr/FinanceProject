@@ -1,2 +1,2 @@
 0 1,9,13,19,21 * * * /bin/bash -c 'LOG_BASE="/usr/src/app/logs"; LOG_DIR="$LOG_BASE/$(date +\%Y\%m\%d)"; mkdir -p "$LOG_DIR"; /usr/src/run_finance.sh >> "$LOG_DIR/cron_log.log" 2>&1; find "$LOG_BASE" -type d -mtime +7 | sort | head -n -1 | xargs -r rm -rf'
-0 3 * * * /bin/bash -c 'LOG_BASE="/usr/src/app/logs"; LOG_DIR="$LOG_BASE/simfin-$(date +\%Y\%m\%d)"; mkdir -p "$LOG_DIR"; /usr/src/run_simfin.sh >> "$LOG_DIR/cron_log.log" 2>&1;
+0 3 * * 5 /bin/bash -c 'LOG_BASE="/usr/src/app/logs"; LOG_DIR="$LOG_BASE/simfin-$(date +\%Y\%m\%d)"; mkdir -p "$LOG_DIR"; /usr/src/run_simfin.sh >> "$LOG_DIR/cron_log.log" 2>&1;

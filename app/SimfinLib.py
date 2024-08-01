@@ -8,8 +8,8 @@ warnings.filterwarnings('ignore')
 load_dotenv()
 PG_SCHEMA_NAME = 'finance'
 SIMFIN_REFRESH_DAYS = 3
-# SIMFIN_DATASETS = ['income', 'balance']
-SIMFIN_DATASETS = ['balance']
+# SIMFIN_DATASETS = ['income', 'balance', 'cashflow']
+SIMFIN_DATASETS = ['cashflow']
 
 
 def load_simfin():
@@ -125,6 +125,36 @@ def simfin_rename_columns(dataset, df):
             'Retained Earnings': 'retained_earnings',
             'Total Equity': 'total_equity',
             'Total Liabilities & Equity': 'total_liabilities_equity'
+        })
+    elif dataset == "cashflow":
+        df = df.rename(columns={
+            'Ticker': 'ticker',
+            'SimFinId': 'simfin_id',
+            'Currency': 'currency',
+            'Fiscal Year': 'fiscal_year',
+            'Fiscal Period': 'fiscal_period',
+            'Publish Date': 'publish_date',
+            'Restated Date': 'restated_date',
+            'Shares (Basic)': 'shares_basic',
+            'Shares (Diluted)': 'shares_diluted',
+            'Net Income/Starting Line': 'net_income_starting_line',
+            'Depreciation & Amortization': 'depreciation_and_amortization',
+            'Non-Cash Items': 'non_cash_items',
+            'Change in Working Capital': 'change_in_working_capital',
+            'Change in Accounts Receivable': 'change_in_accounts_receivable',
+            'Change in Inventories': 'change_in_inventories',
+            'Change in Accounts Payable': 'change_in_accounts_payable',
+            'Change in Other': 'change_in_other',
+            'Net Cash from Operating Activities': 'net_cash_from_operating_activities',
+            'Change in Fixed Assets & Intangibles': 'change_in_fixed_assets_and_intangibles',
+            'Net Change in Long Term Investment': 'net_change_in_long_term_investment',
+            'Net Cash from Acquisitions & Divestitures': 'net_cash_from_acquisitions_and_divestitures',
+            'Net Cash from Investing Activities': 'net_cash_from_investing_activities',
+            'Dividends Paid': 'dividends_paid',
+            'Cash from (Repayment of) Debt': 'cash_from_repayment_of_debt',
+            'Cash from (Repurchase of) Equity': 'cash_from_repurchase_of_equity',
+            'Net Cash from Financing Activities': 'net_cash_from_financing_activities',
+            'Net Change in Cash': 'net_change_in_cash'
         })
         df.rename_axis('report_date', inplace=True)
     return df

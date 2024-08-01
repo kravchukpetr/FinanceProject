@@ -1,5 +1,5 @@
-import Simfin as sf
+import SimfinLib as sfl
 import warnings
 warnings.filterwarnings('ignore')
 
-sf.load_simfin()
+sfl.load_simfin()

@@ -1,1 +1,1 @@
-/usr/local/bin/python /usr/src/app/RunDailySimFin.py
+/usr/local/bin/python /usr/src/app/RunDailySimfin.py

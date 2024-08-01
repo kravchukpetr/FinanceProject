@@ -16,7 +16,7 @@ from tradingview_ta import TA_Handler, Interval
 from tradernet import NtApi
 import psycopg2.extras as extras
 # import pandas_ta
-from app.Common import EXCHANGE_LIST
+from Common import EXCHANGE_LIST
 from dotenv import load_dotenv
 from Utils import get_conn_to_pg
 
