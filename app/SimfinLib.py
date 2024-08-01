@@ -8,8 +8,8 @@ warnings.filterwarnings('ignore')
 load_dotenv()
 PG_SCHEMA_NAME = 'finance'
 SIMFIN_REFRESH_DAYS = 3
-# SIMFIN_DATASETS = ['income', 'balance', 'cashflow']
-SIMFIN_DATASETS = ['cashflow']
+SIMFIN_DATASETS = ['income', 'balance', 'cashflow']
+# SIMFIN_DATASETS = ['cashflow']
 
 
 def load_simfin():
