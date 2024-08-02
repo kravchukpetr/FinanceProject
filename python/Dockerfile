@@ -8,7 +8,9 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 # Add the script to the Docker Image
 ADD run_finance.sh /usr/src/run_finance.sh
+ADD run_simfin.sh /usr/src/run_simfin.sh
 RUN chmod 0775 /usr/src/run_finance.sh
+RUN chmod 0775 /usr/src/run_simfin.sh
 COPY crontab /etc/cron.d/crontab
 RUN crontab /etc/cron.d/crontab
 CMD ["cron","-f"]

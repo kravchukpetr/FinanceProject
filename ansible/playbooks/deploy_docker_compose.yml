@@ -22,6 +22,11 @@
         mode: '0755'
       when: ansible_os_family == 'Debian'
 
+    - name: Stop Docker Compose services
+      command: /usr/local/bin/docker-compose down --rmi all
+      args:
+        chdir: "{{ project_dir }}"
+
     - name: Clone project repository
       git:
         repo: 'https://github.com/kravchukpetr/FinanceProject.git'
