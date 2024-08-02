@@ -27,7 +27,8 @@ RUN chmod 600 /root/.ssh/id_rsa && \
     mkdir -p /root/.ssh && \
     touch /root/.ssh/known_hosts
 
+ENV ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no"
+CMD ["ansible-playbook", "-i", "inventory/hosts.ini", "playbooks/deploy_docker_compose.yml"]
+CMD ["ansible-playbook", "-i", "inventory/hosts.ini", "playbooks/backup_postgres.yml"]
 # Entry point to keep the container running
-RUN ansible-playbook -i inventory/hosts.ini playbooks/deploy_docker_compose.yml
-RUN ansible-playbook -i inventory/hosts.ini playbooks/backup_postgres.yml
 CMD ["tail", "-f", "/dev/null"]

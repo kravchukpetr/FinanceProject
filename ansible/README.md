@@ -49,7 +49,11 @@ docker run -it --name ansible-container -v ./playbooks:/ansible/playbooks -v ./i
 ```bash
 cd /ansible
 ansible-playbook -i inventory/hosts.ini playbooks/deploy_docker_compose.yml --ask-become-pass
+ansible-playbook -i inventory/hosts.ini playbooks/deploy_docker_compose.yml -e 'ansible_ssh_extra_args="-o StrictHostKeyChecking=no"'
 ```
+
+
+
 Backup to crontab
 ```bash
 ansible-playbook -i inventory/hosts.ini playbooks/backup_postgres.yml --ask-become-pass
