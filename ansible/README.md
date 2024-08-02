@@ -1,3 +1,24 @@
+## Deployment of application
+### 1 - create ansible container
+```bash
+cd ansible
+./deploy_ansible.sh
+```
+### 2 - check container is exists
+```bash
+docker ps -a
+```
+### 3 - mobe inside container
+```bash
+docker exec -it ansible-container /bin/bash
+```
+### 4 - run script to deploy on remote server with ansible
+```bash
+./run_ansible_cmd_in_container.sh
+```
+
+
+## Details
 ### Add ansible use to remote server
 ```bash
 ssh your_existing_user@your_remote_server_ip
@@ -51,8 +72,6 @@ cd /ansible
 ansible-playbook -i inventory/hosts.ini playbooks/deploy_docker_compose.yml --ask-become-pass
 ansible-playbook -i inventory/hosts.ini playbooks/deploy_docker_compose.yml -e 'ansible_ssh_extra_args="-o StrictHostKeyChecking=no"'
 ```
-
-
 
 Backup to crontab
 ```bash
