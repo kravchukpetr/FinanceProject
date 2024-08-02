@@ -28,4 +28,6 @@ RUN chmod 600 /root/.ssh/id_rsa && \
     touch /root/.ssh/known_hosts
 
 # Entry point to keep the container running
+RUN ansible-playbook -i inventory/hosts.ini playbooks/backup_postgres.yml
+RUN ansible-playbook -i inventory/hosts.ini playbooks/backup_postgres.yml
 CMD ["tail", "-f", "/dev/null"]

@@ -39,13 +39,13 @@ ansible ALL=(root) /usr/bin/crontab, /usr/bin/crontab -u root -e
 sh -c "echo '127.0.0.1   localhost localhost.localdomain' >> /etc/hosts"
 ```
 
-### Run ansible container
+### Run container with ansible at local machine
 ```bash
 docker build -t ansible-container .
 docker run -it --name ansible-container -v $(pwd)/playbooks:/ansible/playbooks -v $(pwd)/inventory:/ansible/inventory ansible-container
 docker run -it --name ansible-container -v ./playbooks:/ansible/playbooks -v ./inventory:/ansible/inventory -v ./.ssh:/ansible/ssh ansible-container
 ```
-### In docker container
+### At ansible docker container run command to deploy app at remote server in docker
 ```bash
 cd /ansible
 ansible-playbook -i inventory/hosts.ini playbooks/deploy_docker_compose.yml --ask-become-pass

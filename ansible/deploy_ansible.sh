@@ -16,4 +16,4 @@ docker stop $(docker ps -a -q -f name=$CONTAINER_NAME)
 [ "$(docker volume ls -q -f name=$VOLUME_INVENTORY)" ] && docker volume rm $VOLUME_INVENTORY || echo "Volume '$VOLUME_INVENTORY' does not exist."
 [ "$(docker volume ls -q -f name=$VOLUME_PLAYBOOKS)" ] && docker volume rm $VOLUME_PLAYBOOKS || echo "Volume '$VOLUME_INVENTORY' does not exist."
 docker build -t $CONTAINER_NAME .
-$WINPTY_CMD docker run -d --name $CONTAINER_NAME -v ./playbooks:/ansible/playbooks -v ./inventory:/ansible/inventory $CONTAINER_NAME
+$WINPTY_CMD docker run -d --name $CONTAINER_NAME --env-file .env -v ./playbooks:/ansible/playbooks -v ./inventory:/ansible/inventory $CONTAINER_NAME
