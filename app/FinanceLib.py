@@ -196,7 +196,7 @@ def get_all_stock_recomendation(sleep_time=2, is_debug=0):
 
 def get_stock_quote_from_db(stock, screener, date_from=None, date_to=None, is_dt_index=1, is_stock_index=0):
     """
-    Returns qultes from DB
+    Returns stock quotes from DB
     """
 
     conn = get_conn_to_pg()
@@ -206,7 +206,7 @@ def get_stock_quote_from_db(stock, screener, date_from=None, date_to=None, is_dt
     date_to_str = "'" + date_to + "'" if date_to else "NULL"
 
     query = f"select * from finance.f_get_quote ({date_from_str}, {date_to_str}, {stock_str}, '{screener}')"
-    print(query)
+    # print(query)
     lst_index = []
     # if Stock.find(',') > 0:
     if is_dt_index == 1:
