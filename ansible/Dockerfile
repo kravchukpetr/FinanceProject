@@ -29,10 +29,10 @@ RUN chmod 600 /root/.ssh/id_rsa && \
     touch /root/.ssh/known_hosts
 
 RUN chmod +x /ansible/run_ansible_cmd_in_container.sh
-ENTRYPOINT ["/ansible/run_ansible_cmd_in_container.sh"]
+#ENTRYPOINT ["/ansible/run_ansible_cmd_in_container.sh"]
 
 #ENV ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no"
 #CMD ["ansible-playbook", "-i", "inventory/hosts.ini", "playbooks/deploy_docker_compose.yml"]
 #CMD ["ansible-playbook", "-i", "inventory/hosts.ini", "playbooks/backup_postgres.yml"]
 ## Entry point to keep the container running
-#CMD ["tail", "-f", "/dev/null"]
+CMD ["tail", "-f", "/dev/null"]

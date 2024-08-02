@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.9
 COPY requirements.txt /usr/src/requirements.txt
 WORKDIR /usr/src
 RUN apt-get update
