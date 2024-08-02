@@ -13,6 +13,8 @@ services:
       - "${PG_PORT}:${PG_PORT}"
     volumes:
       - ./data:/var/lib/postgresql/data
+    networks:
+      - fin_app_network
 
   pgadmin:
     container_name: pgadmin4_container
@@ -23,6 +25,8 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PG_ADMIN_PWD}
     ports:
       - "5050:80"
+    networks:
+      - fin_app_network
 
   app:
     build: ./python
@@ -36,3 +40,9 @@ services:
         PG_PORT: ${PG_PORT}
         PG_HOST: ${PG_HOST}
         SIMFIN_API_KEY: ${SIMFIN_API_KEY}
+    networks:
+      - fin_app_network
+
+networks:
+  fin_app_network:
+    driver: bridge
