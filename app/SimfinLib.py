@@ -52,8 +52,8 @@ def load_simfin_income(engine, schema_name, dataset, index_list, parse_dates_lis
                            refresh_days=refresh_days,
                            index=index_list,
                            parse_dates=parse_dates_list)
-    income_tickers = df_quarterly.groupby('Ticker').agg({'Ticker': 'count'}).rename(columns={'Ticker': 'CountRows'})
-    for idx, ticker in enumerate(income_tickers.index):
+    tickers = df_quarterly.groupby('Ticker').agg({'Ticker': 'count'}).rename(columns={'Ticker': 'CountRows'})
+    for idx, ticker in enumerate(tickers.index):
         print(idx, ticker)
         if '_delisted' not in ticker:
             df_ticker = df_quarterly[df_quarterly['Ticker'] == ticker]
@@ -93,7 +93,6 @@ def simfin_rename_columns(dataset, df):
             'Net Income': 'net_income',
             'Net Income (Common)': 'net_income_common'
         })
-        df.rename_axis('report_date', inplace=True)
     elif dataset == 'balance':
         df = df.rename(columns={
             'Ticker': 'ticker',
@@ -156,7 +155,7 @@ def simfin_rename_columns(dataset, df):
             'Net Cash from Financing Activities': 'net_cash_from_financing_activities',
             'Net Change in Cash': 'net_change_in_cash'
         })
-        df.rename_axis('report_date', inplace=True)
+    df.rename_axis('report_date', inplace=True)
     return df
 
 
