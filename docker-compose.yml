@@ -31,3 +31,8 @@ services:
       - ./app:/usr/src/app
     environment:
         PG_PWD: ${PG_PWD}
+        PG_USR: ${PG_USR}
+        PG_DB: ${PG_DB}
+        PG_PORT: ${PG_PORT}
+        PG_HOST: ${PG_HOST}
+        SIMFIN_API_KEY: ${SIMFIN_API_KEY}
