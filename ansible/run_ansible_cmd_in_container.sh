@@ -1,0 +1,2 @@
+ansible-playbook -i inventory/hosts.ini playbooks/deploy_docker_compose.yml -e 'ansible_ssh_extra_args="-o StrictHostKeyChecking=no"'
+ansible-playbook -i inventory/hosts.ini playbooks/backup_postgres.yml -e 'ansible_ssh_extra_args="-o StrictHostKeyChecking=no"'

@@ -16,6 +16,7 @@ WORKDIR /ansible
 # Copy the local Ansible playbooks and inventory to the container
 COPY ./playbooks /ansible/playbooks
 COPY ./inventory /ansible/inventory
+COPY run_ansible_cmd_in_container.sh /ansible/run_ansible_cmd_in_container.sh
 
 # Copy the SSH private key into the container
 COPY ./.ssh/id_rsa_root /root/.ssh/id_rsa
@@ -27,8 +28,11 @@ RUN chmod 600 /root/.ssh/id_rsa && \
     mkdir -p /root/.ssh && \
     touch /root/.ssh/known_hosts
 
-ENV ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no"
-CMD ["ansible-playbook", "-i", "inventory/hosts.ini", "playbooks/deploy_docker_compose.yml"]
-CMD ["ansible-playbook", "-i", "inventory/hosts.ini", "playbooks/backup_postgres.yml"]
-# Entry point to keep the container running
-CMD ["tail", "-f", "/dev/null"]
+RUN chmod +x /ansible/run_ansible_cmd_in_container.sh
+ENTRYPOINT ["/ansible/run_ansible_cmd_in_container.sh"]
+
+#ENV ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no"
+#CMD ["ansible-playbook", "-i", "inventory/hosts.ini", "playbooks/deploy_docker_compose.yml"]
+#CMD ["ansible-playbook", "-i", "inventory/hosts.ini", "playbooks/backup_postgres.yml"]
+## Entry point to keep the container running
+#CMD ["tail", "-f", "/dev/null"]
