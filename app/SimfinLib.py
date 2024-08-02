@@ -13,8 +13,8 @@ load_dotenv()
 PG_SCHEMA_NAME = 'finance'
 SIMFIN_REFRESH_DAYS = 3
 SIMFIN_REFRESH_DAYS_HUB = 30
-# SIMFIN_DATASETS = ['income', 'balance', 'cashflow', 'simfin_stats']
-SIMFIN_DATASETS = ['simfin_stats']
+SIMFIN_DATASETS = ['income', 'balance', 'cashflow', 'simfin_stats']
+# SIMFIN_DATASETS = ['simfin_stats']
 SIMFIN_FOLDER = '~/simfin_data/'
 
 
