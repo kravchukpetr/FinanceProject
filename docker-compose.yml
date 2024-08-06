@@ -2,8 +2,8 @@ version: '3'
 services:
   postgres:
     build: ./postgres
-    container_name: postgres_finance
-    hostname: postgres_finance
+    container_name: postgres
+    hostname: postgres
     environment:
       - POSTGRES_USER=${PG_USR}
       - POSTGRES_PASSWORD=${PG_PWD}
@@ -33,6 +33,8 @@ services:
     container_name: finance_app
     depends_on:
       - postgres
+    links:
+      - postgres:postgres
     volumes:
       - ./app:/usr/src/app
     environment:
