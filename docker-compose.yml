@@ -44,11 +44,12 @@ services:
         SIMFIN_API_KEY: ${SIMFIN_API_KEY}
     networks:
       - fin_app_network
+    links:
+      - postgres
 
 networks:
   fin_app_network:
     name: fin_app_network
     driver: bridge
 
-links:
-  - postgres:postgres_finance
+
