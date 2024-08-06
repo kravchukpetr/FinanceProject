@@ -39,7 +39,7 @@ services:
         PG_USR: ${PG_USR}
         PG_DB: ${PG_DB}
         PG_PORT: ${PG_PORT}
-        PG_HOST: ${PG_HOST}
+        PG_HOST: postgres
         SIMFIN_API_KEY: ${SIMFIN_API_KEY}
     networks:
       - fin_app_network

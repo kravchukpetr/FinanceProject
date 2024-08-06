@@ -23,7 +23,7 @@
       when: ansible_os_family == 'Debian'
 
     - name: Stop Docker Compose services
-      command: /usr/local/bin/docker-compose down --rmi all --remove-orphans --networks
+      command: /usr/local/bin/docker-compose down --rmi all
       args:
         chdir: "{{ project_dir }}"
 
