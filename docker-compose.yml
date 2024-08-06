@@ -3,6 +3,7 @@ services:
   postgres:
     build: ./postgres
     container_name: postgres_finance
+    hostname: postgres_finance
     environment:
       - POSTGRES_USER=${PG_USR}
       - POSTGRES_PASSWORD=${PG_PWD}
@@ -48,3 +49,6 @@ networks:
   fin_app_network:
     name: fin_app_network
     driver: bridge
+
+links:
+  - postgres:postgres_finance
