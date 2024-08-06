@@ -47,4 +47,5 @@ services:
 
 networks:
   fin_app_network:
+    name: fin_app_network
     driver: bridge
