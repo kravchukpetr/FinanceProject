@@ -2,7 +2,6 @@ version: '3'
 services:
   postgres:
     build: ./postgres
-    hostname: postgres_finance
     container_name: postgres_finance
     environment:
       - POSTGRES_USER=${PG_USR}
