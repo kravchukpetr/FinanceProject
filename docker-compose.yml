@@ -33,8 +33,6 @@ services:
     container_name: finance_app
     depends_on:
       - postgres
-    links:
-      - postgres:postgres
     volumes:
       - ./app:/usr/src/app
     environment:
