@@ -10,7 +10,7 @@
     backup_dir: /projects/backup
     db_user: postgres
     db_name: postgres
-    container_name: postgres_finance
+    container_name: postgres
     cron_time: "0 2 * * *"  # Daily at 2 AM
 
   tasks:
