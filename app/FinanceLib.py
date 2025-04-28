@@ -80,12 +80,12 @@ def save_stock_quote_to_db(stock, screener, date_from, date_to):
         try:
             for row in df_to_lst:
                 dt = row[0]
-                open_value = row[1]
+                open_value = row[4]
                 high_value = row[2]
                 low_value = row[3]
-                close_value = row[4]
-                adj_close_value = row[5]
-                volume = row[6]
+                close_value = row[1]
+                adj_close_value = row[1]
+                volume = row[5]
                 query = f"CALL finance.p_load_quote('{dt}', '{stock}', {open_value}, {high_value}, {low_value}, {close_value}, {adj_close_value}, {volume})"
                 cursor.execute(query)
             conn.commit()
@@ -286,11 +286,11 @@ def get_stock_list_from_db(screener=None):
     return df
 
 
-def get_all_stock_by_period(dt_from, dt_to, logger, sleep_time=5, is_debug=0):
+def get_all_stock_by_period(dt_from, dt_to, logger, screener='america', sleep_time=5, is_debug=0):
     """
     Get quotes for all stocks by time period from dt_from to dt_to
     """
-    stock_df = get_stock_list_from_db()
+    stock_df = get_stock_list_from_db(screener=screener)
     cnt_error = 0
     lst_error = []
     result_dic = {}
@@ -583,7 +583,7 @@ def execute_values(conn, df, table):
     """
     tuples = [tuple(x) for x in df.to_numpy()]
 
-    cols = ','.join(list(df.columns))
+    cols = ','.join(list(df.columns.get_level_values(0)))
 
     # SQL query to execute
     query = "INSERT INTO %s(%s) VALUES %%s" % (table, cols)
@@ -627,7 +627,7 @@ def load_stock_history_to_db(dt_from, dt_to, stock_input=None, check_is_load=1, 
                                             "Volume": "Volume"
                                             })
                     tbl = 'finance.quotes'
-
+                    df["AdjClose"] = df["CloseValue"]
                 if screener == 'Forex' and (screener_input == screener or screener_input is None):
                     data = yf.Ticker(f"{stock}=x")
                     data = data.history(period="2Y", interval="1h")

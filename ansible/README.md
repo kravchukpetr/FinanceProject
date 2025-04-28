@@ -8,7 +8,7 @@ cd ansible
 ```bash
 docker ps -a
 ```
-### 3 - mobe inside container
+### 3 - move inside container
 ```bash
 docker exec -it ansible-container /bin/bash
 ```

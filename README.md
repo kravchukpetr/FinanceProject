@@ -86,3 +86,15 @@ docker cp postgres_finance:/var/lib/postgresql/data/backup_finance.sql /projects
 ```
 ## pgAdmin
 http://89.253.222.32:5050/browser/
+
+## Restore PG from backup
+
+```bash
+docker cp /projects/backup/backup-2024-08-06.sql f323f072f588:/backup-2024-08-06.sql
+docker exec -it f323f072f588 bin/bash
+psql -U postgres -d postgres -f ./backup-2024-08-06.sql
+
+psql -U postgres -d postgres -f /backup-2024-08-06.sql
+/usr/lib/postgresql/15/bin/pg_resetwal /var/lib/postgresql/data
+docker run -it --rm --entrypoint bash financeproject-postgres
+```
