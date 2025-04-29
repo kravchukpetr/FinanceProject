@@ -87,6 +87,7 @@ def save_stock_quote_to_db(stock, screener, date_from, date_to):
                 adj_close_value = row[1]
                 volume = row[5]
                 query = f"CALL finance.p_load_quote('{dt}', '{stock}', {open_value}, {high_value}, {low_value}, {close_value}, {adj_close_value}, {volume})"
+                logging.info(query)
                 cursor.execute(query)
             conn.commit()
             conn.close()
@@ -297,7 +298,8 @@ def get_all_stock_by_period(dt_from, dt_to, logger, screener='america', sleep_ti
     num_ticker = 0
     for ind, row in stock_df.iterrows():
         try:
-            print(num_ticker, row.values[0])
+            print(num_ticker, row.values[0], dt_from, dt_to)
+            logging.info(row.values[0] + ' ' + row.values[7] + ' ' + dt_from + ' ' + dt_to)
             save_stock_quote_to_db(row.values[0], row.values[7], dt_from, dt_to)
             logging.info(row.values[0] + ' Success')
             time.sleep(sleep_time) 
@@ -332,7 +334,7 @@ def daily_update_quote(dt_from=None, sleep_time=5, is_debug=0):
 
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    logging.basicConfig(filename=log_dir + '/app.log', filemode='a+', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
+    logging.basicConfig(filename=log_dir + '/app.log', filemode='a+', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%H:%M:%S', level=logging.INFO)
     logger = logging.getLogger()
     logger.info('DailyUpdateQuote')
     logger.info('Parameters: ' + 'DtFrom = ' + str(dt_from) + '; DtTo = ' + str(dt_to))
@@ -345,7 +347,8 @@ def daily_update_quote(dt_from=None, sleep_time=5, is_debug=0):
                                           sleep_time,
                                           is_debug
                                           )
-    
+
+    logger.info('result_dict: ' + result_dict)
     write_log(2, 1, result_dict['State'], result_dict['CntError'], ', '.join(result_dict['lst_error']), logger)
 
 
