@@ -287,7 +287,7 @@ def get_stock_list_from_db(screener=None):
     return df
 
 
-def get_all_stock_by_period(dt_from, dt_to, logger, screener='america', sleep_time=5, is_debug=0):
+def get_all_stock_by_period(dt_from, dt_to, screener='america', sleep_time=5, is_debug=0):
     """
     Get quotes for all stocks by time period from dt_from to dt_to
     """
