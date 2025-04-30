@@ -19,7 +19,7 @@ import psycopg2.extras as extras
 from Common import EXCHANGE_LIST
 from dotenv import load_dotenv
 from Utils import get_conn_to_pg
-
+import json
 
 load_dotenv()
 CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + '/' + 'DB.config'
@@ -302,10 +302,10 @@ def get_all_stock_by_period(dt_from, dt_to, logger, screener='america', sleep_ti
             logging.info(row.values[0] + ' ' + row.values[7] + ' ' + dt_from + ' ' + dt_to)
             save_stock_quote_to_db(row.values[0], row.values[7], dt_from, dt_to)
             logging.info(row.values[0] + ' Success')
-            time.sleep(sleep_time) 
+            time.sleep(sleep_time)
         except Exception as e:
             cnt_error += 1
-            lst_error.append(row.values[0]) 
+            lst_error.append(row.values[0])
             logging.info(row.values[0] + ' Error: ' + str(e))
         if is_debug == 1 and num_ticker == 5:
             break
@@ -329,7 +329,9 @@ def daily_update_quote(dt_from=None, sleep_time=5, is_debug=0):
     log_dir = LOG_DIR + '/logs/' + today_dt
 
     dt_to = date.today()
-    if not dt_from:
+    if dt_from:
+        dt_from = datetime.strptime(dt_from, "%Y-%m-%d")
+    else:
         dt_from = date.today() + timedelta(days=-3)
 
     if not os.path.exists(log_dir):
@@ -339,17 +341,20 @@ def daily_update_quote(dt_from=None, sleep_time=5, is_debug=0):
     logger.info('DailyUpdateQuote')
     logger.info('Parameters: ' + 'DtFrom = ' + str(dt_from) + '; DtTo = ' + str(dt_to))
     logger.info('log_dir: ' + log_dir)
-    
-    write_log(1, 1, 1, 0, 'NULL', logger)
-    result_dict = get_all_stock_by_period(dt_from.strftime('%Y-%m-%d'),
-                                          dt_to.strftime('%Y-%m-%d'),
-                                          logger,
-                                          sleep_time,
-                                          is_debug
-                                          )
 
-    logger.info('result_dict: ' + result_dict)
-    write_log(2, 1, result_dict['State'], result_dict['CntError'], ', '.join(result_dict['lst_error']), logger)
+    screener_list = ['Forex', 'america']
+    for screener in screener_list:
+        write_log(1, 1, 1, 0, 'NULL', logger)
+        result_dict = get_all_stock_by_period(dt_from.strftime('%Y-%m-%d'),
+                                              dt_to.strftime('%Y-%m-%d'),
+                                              screener,
+                                              sleep_time,
+                                              is_debug
+                                              )
+
+        logger.info('result_dict: ' + json.dumps(result_dict))
+        write_log(2, 1, result_dict['State'], result_dict['CntError'], ', '.join(result_dict['lst_error']), logger)
+
 
 
 def write_log(type_write, wf_id, wf_status, cnt_error, error_msg, logger):
@@ -365,7 +370,9 @@ def write_log(type_write, wf_id, wf_status, cnt_error, error_msg, logger):
         conn.commit()
         conn.close()
     except Exception as e:
-        logger.error('Error in Write Log: ' + str(e)) 
+        logger.error('Error in Write Log: ' + str(e))
+        logger.error(query)
+
 
 
 # def get_candle_plot(df_input, stock, re_sample='10D'):
