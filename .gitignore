@@ -17,3 +17,4 @@ app/logs/*
 data/*
 /ansible/.ssh
 .env
+*.pkl
