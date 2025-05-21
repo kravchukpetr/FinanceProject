@@ -87,7 +87,6 @@ def save_stock_quote_to_db(stock, screener, date_from, date_to):
                 adj_close_value = row[1]
                 volume = row[5]
                 query = f"CALL finance.p_load_quote('{dt}', '{stock}', {open_value}, {high_value}, {low_value}, {close_value}, {adj_close_value}, {volume})"
-                logging.info(query)
                 cursor.execute(query)
             conn.commit()
             conn.close()
