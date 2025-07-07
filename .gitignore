@@ -18,3 +18,4 @@ data/*
 /ansible/.ssh
 .env
 *.pkl
+.venv/*
