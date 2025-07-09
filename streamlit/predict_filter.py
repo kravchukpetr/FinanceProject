@@ -2,6 +2,13 @@ import streamlit as st
 import pandas as pd
 import os
 import json
+import plotly.graph_objects as go
+import sys
+import yfinance as yf
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
+from FinanceLib import get_stock_quote_from_db
+
 
 # Конфигурация страницы
 st.set_page_config(page_title="DataFrame Viewer", layout="wide")
@@ -139,3 +146,81 @@ if st.button("Сохранить фильтр"):
     with open(os.path.join(FILTERS_DIR, f"{filter_name}.json"), "w") as f:
         json.dump(export_values, f, default=str)
     st.success(f"Фильтр '{filter_name}.json' сохранён!")
+
+st.subheader("🕯️ График котировок по выбранному инструменту")
+
+selected_symbol = st.selectbox(
+    "Выберите тикер (symbol) для просмотра графика:",
+    options=df['symbol'].unique().tolist()
+)
+
+if selected_symbol:
+    # Загружаем данные с Yahoo Finance (или замените на свой источник)
+    # hist = yf.download(selected_symbol, period="6mo", interval="1d")
+    
+    hist = get_stock_quote_from_db(selected_symbol, "america")
+    hist = hist.rename_axis('Date')
+    hist = hist.rename(columns={'stock': 'symbol', 
+                                    'openvalue': 'Open', 
+                                    'highvalue': 'High', 
+                                    'lowvalue': 'Low', 
+                                    'closevalue': 'Close', 
+                                    'adjclose': 'Adj Close', 
+                                    'volume': 'Volume'})
+    # hist.dropna(inplace=True)
+        
+    # hist = yf.download(selected_symbol, period="6mo", interval="1d")
+    hist = hist.reset_index()
+    # ✅ Подготовка: Сбросить MultiIndex, если есть
+    if isinstance(hist.columns, pd.MultiIndex):
+        # hist.columns = ['_'.join(col).strip() for col in hist.columns]
+        hist.columns = hist.columns.get_level_values(0)
+
+    # ✅ Проверка наличия нужных колонок
+    required_columns = ['Date', 'Open', 'High', 'Low', 'Close']
+    for col in required_columns:
+        if col not in hist.columns:
+            st.error(f"Колонка {col} отсутствует в данных.")
+            st.stop()
+
+    # ✅ Приведение типов и сортировка
+    hist["Date"] = pd.to_datetime(hist["Date"])
+    hist = hist.sort_values("Date")
+    hist.set_index("Date", inplace=True)
+
+    hist["EMA_50"] = hist["Close"].ewm(span=50, adjust=False).mean()
+    hist["EMA_200"] = hist["Close"].ewm(span=200, adjust=False).mean()
+
+    for col in ["Open", "High", "Low", "Close"]:
+        hist[col] = pd.to_numeric(hist[col], errors="coerce")
+
+    hist = hist.dropna(subset=["Open", "High", "Low", "Close"])
+
+    # ✅ Построение графика
+    fig = go.Figure()
+
+    fig.add_trace(go.Candlestick(
+        x=hist.index,
+        open=hist["Open"],
+        high=hist["High"],
+        low=hist["Low"],
+        close=hist["Close"],
+        name="Candles"
+    ))
+
+    # EMA линии (если есть)
+    if "EMA_50" in hist.columns:
+        fig.add_trace(go.Scatter(x=hist.index, y=hist["EMA_50"], name="EMA 50", line=dict(color="blue")))
+
+    if "EMA_200" in hist.columns:
+        fig.add_trace(go.Scatter(x=hist.index, y=hist["EMA_200"], name="EMA 200", line=dict(color="red")))
+
+    fig.update_layout(
+        title="График свечей",
+        xaxis_title="Дата",
+        yaxis_title="Цена",
+        xaxis_rangeslider_visible=False,
+        height=600
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
