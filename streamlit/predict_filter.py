@@ -42,13 +42,13 @@ with col1:
             st.session_state.loaded_filter = json.load(f)
         st.session_state.reset_filters = False
         st.success(f"Фильтр {selected_filter_file} загружен!")
-        st.experimental_rerun()
+        st.rerun()
 
 with col2:
     if st.button("🚫 Сбросить все фильтры"):
         st.session_state.loaded_filter = {}
         st.session_state.reset_filters = True
-        st.experimental_rerun()
+        st.rerun()
 
 # --- Фильтрация ---
 st.subheader("🔍 Фильтрация и сортировка")
